@@ -8,24 +8,36 @@ DO NOT CHANGE ANY OF THE FUNCTION SIGNATURES BELOW
 '''
 
 from socket import socket, AF_INET, SOCK_DGRAM
-import struct
+import struct, socket, time
 from datetime import datetime
 
 
 def getNTPTimeValue(server="time.apple.com", port=123) -> (bytes, float, float):
-    # add your code here 
-    return (pkt, T1, T4)
+    host = server
+    port = port
+    buf = 1024
+    address = (host, port)
+    msg = b'\x1b' + 47 * b'\0'
 
+    T1 = datetime.utcnow()
+    soc = socket.socket(AF_INET, SOCK_DGRAM)
+    soc.sendto(msg, address)
+    msg, address = soc.recvfrom(buf)
 
+    t = struct.unpack('!12I', msg)[10]
+    T4 = datetime.utcnow()
+    return msg, T1, T4
+
+'''
 def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
     # add your code here 
     return (rtt, offset)
 
+
 def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
     # add your code here
     return currentTime
-
+'''
 
 if __name__ == "__main__":
-
-    print(getCurrentTime())
+    getNTPTimeValue()
