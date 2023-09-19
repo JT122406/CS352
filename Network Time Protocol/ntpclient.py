@@ -28,7 +28,6 @@ def getNTPTimeValue(server="time.apple.com", port=123) -> (bytes, float, float):
     T4 = datetime.utcnow()
     return msg, T1, T4
 
-'''
 def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
     # add your code here 
     return (rtt, offset)
@@ -37,7 +36,7 @@ def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
 def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
     # add your code here
     return currentTime
-'''
+
 
 if __name__ == "__main__":
-    getNTPTimeValue()
+    print(getCurrentTime())
