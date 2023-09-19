@@ -42,14 +42,22 @@ def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
 if __name__ == "__main__":
     #print(getCurrentTime())
     #print(getNTPTimeValue())
-    A, B, C = getNTPTimeValue()
+    A, B, C = getNTPTimeValue("clock.nyc.he.net", 123)
     print(B)
     print(C)
     #print(A)
     unpacked = struct.unpack('!12I', A[:48])
-    print(unpacked[11] - unpacked[10])
+    #print(unpacked[11] - unpacked[10])
     print(unpacked)
-    print(datetime.utcfromtimestamp(unpacked[8] - 2208988800))
-    print(datetime.utcfromtimestamp(unpacked[10] - 2208988800))
-
-    
+    print(datetime.utcfromtimestamp((unpacked[9]/1000000000) + unpacked[8] - 2208988800))
+    #print(datetime.utcfromtimestamp(unpacked[10] - 2208988800))
+    print(datetime.utcfromtimestamp((unpacked[11]/1000000000) - 2208988800 +unpacked[10]))
+    T1 = B
+    T4 = C
+    T2 = datetime.utcfromtimestamp((unpacked[9]/1000000000) - 2208988800 +unpacked[8]) 
+    T3 = datetime.utcfromtimestamp((unpacked[11]/1000000000) - 2208988800 +unpacked[10])  
+    print("this is in order now")
+    print(T1)
+    print(T2)
+    print(T3)
+    print(T4)
