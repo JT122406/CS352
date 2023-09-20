@@ -40,7 +40,7 @@ def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
         (pkt, T12, T42) = getNTPTimeValue(server, port)
         ntpPktToRTTandOffset(pkt, T12, T42)
         (RTT, offset) = ntpPktToRTTandOffset(pkt, T1, T4)
-        times.append(datetime.now() + offset + RTT)
+        times.append(datetime.now().timestamp() + offset + RTT)
 
     currentTime = sum(times)/len(times)
     return currentTime
