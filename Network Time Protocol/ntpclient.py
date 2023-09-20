@@ -68,3 +68,5 @@ if __name__ == "__main__":
     print(T2)
     print(T3)
     print(T4)
+    print(T4.timestamp())
+    print(T4.timestamp() - 100.5)
