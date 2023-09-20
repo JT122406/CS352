@@ -27,7 +27,7 @@ def getNTPTimeValue(server="time.apple.com", port=123) -> (bytes, float, float):
     #t = struct.unpack('!12I', msg)[10]
     t = struct.unpack('!12I', msg[:48])
     T4 = datetime.utcnow()
-    return msg, T1, T4
+    return msg, T1.timestamp(), T4.timestamp()
 
 def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
     # add your code here 
@@ -56,17 +56,20 @@ if __name__ == "__main__":
     unpacked = struct.unpack('!12I', A[:48])
     #print(unpacked[11] - unpacked[10])
     print(unpacked)
-    print(datetime.utcfromtimestamp((unpacked[9]/1000000000) + unpacked[8] - 2208988800))
+    print(datetime.fromtimestamp((unpacked[9]/1000000000) + unpacked[8] - 2208988800))
     #print(datetime.utcfromtimestamp(unpacked[10] - 2208988800))
-    print(datetime.utcfromtimestamp((unpacked[11]/1000000000) - 2208988800 +unpacked[10]))
+    print(datetime.fromtimestamp((unpacked[11]/1000000000) - 2208988800 +unpacked[10]))
     T1 = B
     T4 = C
     T2 = datetime.utcfromtimestamp((unpacked[9]/1000000000) - 2208988800 +unpacked[8]) 
     T3 = datetime.utcfromtimestamp((unpacked[11]/1000000000) - 2208988800 +unpacked[10])  
     print("this is in order now")
-    print(T1)
+    print(datetime.fromtimestamp(T1))
     print(T2)
     print(T3)
-    print(T4)
-    print(T4.timestamp())
-    print(T4.timestamp() - 100.5)
+    print(datetime.fromtimestamp(T4))
+    #print(T4.timestamp())
+    #print(T4.timestamp() - 100.5)
+    #print("difference between T1 and T2", datetime.fromtimestamp(B - ((unpacked[9]/1000000000) - 2208988800 +unpacked[8])))
+    print("difference between T1 and T2", T2 - datetime.fromtimestamp(T1))
+    print("difference between T1 and T2", T2.timestamp() - T1)
