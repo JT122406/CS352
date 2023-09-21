@@ -46,7 +46,7 @@ def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
         offsets.append(offset)
 
     currentTime = (sum(offsets)/len(offsets)) + datetime.now().timestamp()
-    return currentTime
+    return datetime.utcfromtimestamp(currentTime).timestamp()
 
 
 if __name__ == "__main__":
@@ -81,4 +81,6 @@ if __name__ == "__main__":
     print("Offset", Z)
     print("RTT", (datetime.utcfromtimestamp((T4 - T1)) - (T3 - T2)))
     print("Offset", ((T2 - datetime.utcfromtimestamp(T1)) + (T3 - datetime.utcfromtimestamp(T4))))
+    print(datetime.fromtimestamp(getCurrentTime()))
+    print(datetime.now())
     print(getCurrentTime())
