@@ -39,14 +39,13 @@ def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
 
 
 def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
-    times = []
+    offsets = []
     for i in range(iters):
         (pkt, T12, T42) = getNTPTimeValue(server, port)
-        ntpPktToRTTandOffset(pkt, T12, T42)
-        (RTT, offset) = ntpPktToRTTandOffset(pkt, T1, T4)
-        times.append(datetime.now().timestamp() + offset + RTT)
+        (RTT, offset) = ntpPktToRTTandOffset(pkt, T12, T42)
+        offsets.append(offset)
 
-    currentTime = sum(times)/len(times)
+    currentTime = (sum(offsets)/len(offsets)) + datetime.now().timestamp()
     return currentTime
 
 
