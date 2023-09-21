@@ -25,7 +25,7 @@ def getNTPTimeValue(server="time.apple.com", port=123) -> (bytes, float, float):
     msg, address = soc.recvfrom(buf)
 
     #t = struct.unpack('!12I', msg)[10]
-    t = struct.unpack('!12I', msg[:48])
+    struct.unpack('!12I', msg[:48])
     T4 = datetime.utcnow()
     return msg, T1.timestamp(), T4.timestamp()
 
@@ -45,7 +45,7 @@ def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
         (RTT, offset) = ntpPktToRTTandOffset(pkt, T12, T42)
         offsets.append(offset)
 
-    currentTime = (sum(offsets)/len(offsets)) + datetime.utcnow().timestamp()
+    currentTime = (sum(offsets)/len(offsets)) + datetime.now().timestamp()
     return datetime.utcfromtimestamp(currentTime).timestamp()
 
 
