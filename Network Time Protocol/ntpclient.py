@@ -35,7 +35,7 @@ def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
     T3 = datetime.utcfromtimestamp((unpacked[11]/1000000000) - 2208988800 + unpacked[10])
     rtt = (T4 - T1) - (T3.timestamp() - T2.timestamp())
     offset = ((T2.timestamp() - T1) + (T3.timestamp() - T4)) / 2 
-    return (rtt, offset)
+    return rtt, offset
 
 
 def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
@@ -45,7 +45,7 @@ def getCurrentTime(server="time.apple.com", port=123, iters=20) -> float:
         (RTT, offset) = ntpPktToRTTandOffset(pkt, T12, T42)
         offsets.append(offset)
 
-    currentTime = (sum(offsets)/len(offsets)) + datetime.now().timestamp()
+    currentTime = (sum(offsets)/len(offsets)) + datetime.utcnow().timestamp()
     return datetime.utcfromtimestamp(currentTime).timestamp()
 
 
