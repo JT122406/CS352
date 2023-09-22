@@ -32,8 +32,9 @@ def getNTPTimeValue(server="time.apple.com", port=123) -> (bytes, float, float):
 
 def ntpPktToRTTandOffset(pkt: bytes, T1: float, T4: float) -> (float, float):
     unpacked = struct.unpack('!12I', pkt[:48])
-    T2 = datetime.utcfromtimestamp((unpacked[9] / 1000000000) - 2208988800 + unpacked[8])
-    T3 = datetime.utcfromtimestamp((unpacked[11] / 1000000000) - 2208988800 + unpacked[10])
+    number = pow(2, 32)
+    T2 = datetime.utcfromtimestamp((unpacked[9] / number) - 2208988800 + unpacked[8])
+    T3 = datetime.utcfromtimestamp((unpacked[11] / number) - 2208988800 + unpacked[10])
     rtt = (T4 - T1) - (T3.timestamp() - T2.timestamp())
     offset = ((T2.timestamp() - T1) + (T3.timestamp() - T4)) / 2
     return rtt, offset
