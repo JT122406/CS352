@@ -1,14 +1,17 @@
 import sys
 import socket
 
+
+def serverstart(socket1, port, address):
+    socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
+    socketserver.bind((address, port))
+    socketserver.listen(1)
+    return socketserver
+
+
 if __name__ == "__main__":
-    port = int(sys.argv[1])
+    server_socket = serverstart(socket, int(sys.argv[1]), 'localhost')
     keyFileName = sys.argv[2]
-
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    server_socket.bind(('localhost', port))
-    server_socket.listen(1)
 
     while True:
         client_socket, client_address = server_socket.accept()
