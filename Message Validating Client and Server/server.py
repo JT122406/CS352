@@ -17,4 +17,4 @@ if __name__ == "__main__":
         if data != 'HELLO':
             print("Error: Invalid message")
             client_socket.close()
-            break
+            exit()
