@@ -11,7 +11,9 @@ def serverstart(socket1, port, address):
 
 if __name__ == "__main__":
     server_socket = serverstart(socket, int(sys.argv[1]), 'localhost')
-    keyFileName = sys.argv[2]
+
+    with open(sys.argv[2], 'r') as file:
+        keys = [line.strip() for line in file.readlines()]
 
     while True:
         client_socket, client_address = server_socket.accept()
