@@ -9,11 +9,14 @@ def serverstart(socket1, port, address):
     return socketserver
 
 
+def getKeys():
+    with open(sys.argv[2], 'r') as file:
+        return [line.strip() for line in file.readlines()]
+
+
 if __name__ == "__main__":
     server_socket = serverstart(socket, int(sys.argv[1]), 'localhost')
-
-    with open(sys.argv[2], 'r') as file:
-        keys = [line.strip() for line in file.readlines()]
+    keys = getKeys()
 
     while True:
         client_socket, client_address = server_socket.accept()
