@@ -1,3 +1,4 @@
+import hashlib
 import sys
 import socket
 
@@ -18,11 +19,31 @@ if __name__ == "__main__":
     server_socket = serverstart(socket, int(sys.argv[1]), 'localhost')
     keys = getKeys()
 
-    while True:
+    try:
         client_socket, client_address = server_socket.accept()
 
-        data = client_socket.recv(1024).decode().strip()
-        if data != 'HELLO':
+        if client_socket.recv(1024).decode('utf-8').strip() != 'HELLO':
             print("Error: Invalid message")
             client_socket.close()
             exit()
+
+        while True:
+            match client_socket.recv(1024).decode().strip():
+                case 'DATA':
+                    sha256_hash = hashlib.sha256
+                    while True:
+                        message = client_socket.recv(1024).decode().strip()
+                        if message == '.':
+                            break
+
+                case 'QUIT':
+                    server_socket.close()
+                    exit()
+                case _:
+                    print("Error: Invalid message")
+                    client_socket.close()
+                    exit()
+    except Exception as e:
+        print(e)
+        server_socket.close()
+        exit()
