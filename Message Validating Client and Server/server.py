@@ -28,13 +28,28 @@ if __name__ == "__main__":
             exit()
 
         while True:
+            i = 0
             match client_socket.recv(1024).decode().strip():
                 case 'DATA':
-                    sha256_hash = hashlib.sha256
+                    sha256_hash = hashlib.sha256()
                     while True:
                         message = client_socket.recv(1024).decode().strip()
                         if message == '.':
                             break
+                        sha256_hash.update(message.encode())
+                        sha256_hash.update(keys[i].encode())
+                        i += 1
+                        sign = sha256_hash.hexdigest()
+                        client_socket.send("270SIG\n".encode())
+                        client_socket.send(sign.encode())
+
+                        message = client_socket.recv(1024).decode().strip()
+                        if message != 'PASS' and message != 'FAIL':
+                            print("error")
+                            client_socket.close()
+                            exit()
+                        else:
+                            client_socket.send("260OK\n".encode())
 
                 case 'QUIT':
                     server_socket.close()
