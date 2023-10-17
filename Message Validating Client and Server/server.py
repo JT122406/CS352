@@ -30,6 +30,7 @@ if __name__ == "__main__":
             client_socket.close()
             exit()
 
+        client_socket.send("260 OK\n".encode('utf-8'))
         while True:
             i = 0
             match client_socket.recv(1024).decode('utf-8').strip():

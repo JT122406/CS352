@@ -13,6 +13,9 @@ def main():
         client_socket.send("HELLO\n".encode('utf-8'))
         print("Sent 'HELLO' to the server")
 
+        recieve = client_socket.recv(1024).decode('utf-8').strip()
+        print(recieve)
+
         # Close the client socket
         client_socket.close()
 

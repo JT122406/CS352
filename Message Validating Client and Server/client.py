@@ -1,11 +1,26 @@
 import sys
 import socket
 
-#python3 client.py localhost 62 message1.txt signature1.txt
+
+# python3 client.py localhost 62 message1.txt signature1.txt
+
+def startClient(address, port):
+    socket1 = None
+    connected = False
+    while not connected:
+        try:
+            socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            socket1.connect((address, port))
+            print("Connection to: ", address, ":", port)
+            connected = True
+        except Exception as e:
+            pass
+
+    return socket1
+
 
 if __name__ == "__main__":
-    name = sys.argv[1]
-    port = sys.argv[2]
+    client_socket = startClient(sys.argv[1], int(sys.argv[2]))
     messageFileName = sys.argv[3]
     signatureFileName = sys.argv[4]
 
@@ -20,16 +35,17 @@ if __name__ == "__main__":
         signature = [line.strip() for line in s_file]
 
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
-            client_socket.connect((name, int(port)))
-        print("Connection to: ", name, ":", port)
         client_socket.send("HELLO\n".encode('utf-8'))
         print("HELLO")
-        exit()
         response = client_socket.recv(1024).decode().strip()
         if response != "260 OK":
             print("Error: Server response not as expected")
             exit(1)
+        else:
+            print(response)
+            exit(1)
+
+
         message_counter = 0
         for message, signature in zip(message, signature):
             client_socket.send(b"DATA\n")
