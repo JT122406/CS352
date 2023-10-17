@@ -7,8 +7,45 @@ if __name__ == "__main__":
     messageFileName = sys.argv[3]
     signatureFileName = sys.argv[4]
 
-    messageFile = open(messageFileName)
-    Lines = messageFile.readlines()
+    #messageFile = open(messageFileName)
+    #Lines = messageFile.readlines()
 
-    for line in Lines:
-        bytesT = bytes(line, 'utf-8')
+    #for line in Lines:
+        #bytesT = bytes(line, 'utf-8')
+    with open(messageFileName, 'r') as file:
+        message = [line.strip().encode() for line in file ]
+    with open(signatureFileName, 'r') as s_file:
+        signature = [line.strip() for line in s_file ]
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+        client_socket.connect((name, int(port)))
+
+    client_socket.send(b"HELLO\n")
+    response = client_socket.recv(1024).decode().strip()
+    if response != "260 OK":
+        print("Error: Server response not as expected")
+        exit(1)
+    message_counter = 0
+    for message, signature in zip(message, signature):
+        client_socket.send(b"DATA\n")
+        client_socket.send(message)
+        response = client_socket.recv(1024).decode().strip()
+        if response != "270 SIG":
+            print("Error: Server response not as expected")
+            exit(1)
+        server_signature = client_socket.recv(1024).decode().strip()
+        if server_signature == signature:
+            client_socket.send(b"PASS\n")
+        else:
+            client_socket.send(b"FAIL\n")
+        response = client_socket.recv(1024).decode().strip()
+        if response != "260 OK":
+            print("Error: Server response not as expected")
+            exit(1)
+        message_counter += 1
+    client_socket.send(b"QUIT\n")
+    response = client_socket.recv(1024).decode().strip()
+    if response != "260 OK":
+        print("Error: Server response not as expected")
+        exit(1)
+
+    
