@@ -45,33 +45,33 @@ def main():
             exit()
 
         client_socket.send(encodeMessage("260 OK\n"))
-
-        for key in keys:
-            command = decodeMessage(client_socket.recv(1024))
-            print(command)
-            if command == 'DATA':
-                message = decodeMessage(client_socket.recv(1024))
-                print(message + '\n.')
-                client_socket.send(encodeMessage("270 SIG\n"))
-                client_socket.send(hashMessage(message, key) + '\n')
-                output = decodeMessage(client_socket.recv(1024))
-                print(output)
-                if output == 'PASS' or output == 'FAIL':
-                    client_socket.send(encodeMessage("260 OK\n"))
+        while True:
+            for key in keys:
+                command = decodeMessage(client_socket.recv(1024))
+                print(command)
+                if command == 'DATA':
+                    message = decodeMessage(client_socket.recv(1024))
+                    print(message + '\n.')
+                    client_socket.send(encodeMessage("270 SIG\n"))
+                    client_socket.send(hashMessage(message, key) + '\n')
+                    output = decodeMessage(client_socket.recv(1024))
+                    print(output)
+                    if output == 'PASS' or output == 'FAIL':
+                        client_socket.send(encodeMessage("260 OK\n"))
+                    else:
+                        print("Error: Invalid message")
+                        client_socket.close()
+                        server_socket.close()
+                        exit()
+                elif command == 'QUIT':
+                    client_socket.close()
+                    server_socket.close()
+                    exit()
                 else:
                     print("Error: Invalid message")
                     client_socket.close()
                     server_socket.close()
                     exit()
-            elif command == 'QUIT':
-                client_socket.close()
-                server_socket.close()
-                exit()
-            else:
-                print("Error: Invalid message")
-                client_socket.close()
-                server_socket.close()
-                exit()
 
     except Exception as e:
         print(e)
