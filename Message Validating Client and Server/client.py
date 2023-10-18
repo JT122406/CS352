@@ -11,9 +11,9 @@ def startClient(address, port):
         try:
             socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             socket1.connect((address, port))
-            print("Connection to: ", address, ":", port)
+            #print("Connection to: ", address, ":", port)
             connected = True
-        except Exception as e:
+        except Exception:
             pass
 
     return socket1
@@ -28,15 +28,15 @@ if __name__ == "__main__":
     # Lines = messageFile.readlines()
 
     # for line in Lines:
-    # bytesT = bytes(line, 'utf-8')
+    # bytesT = bytes(line, 'ascii')
     with open(messageFileName, 'r') as file:
         message = [line.strip().encode() for line in file]
     with open(signatureFileName, 'r') as s_file:
         signature = [line.strip() for line in s_file]
 
     try:
-        client_socket.send("HELLO\n".encode('utf-8'))
-        print("HELLO")
+        client_socket.send("HELLO\n".encode('ascii'))
+        #print("HELLO")
         response = client_socket.recv(1024).decode().strip()
         if response != "260 OK":
             print("Error: Server response not as expected")
