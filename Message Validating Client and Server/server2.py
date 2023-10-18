@@ -29,7 +29,7 @@ def hashMessage(message, key):
     hash = hashlib.sha256()
     hash.update(encodeMessage(message))
     hash.update(encodeMessage(key))
-    return hash.hexdigest()
+    return encodeMessage(hash.hexdigest())
 
 
 def main():
@@ -53,7 +53,7 @@ def main():
                     message = decodeMessage(client_socket.recv(1024))
                     print(message + '\n.')
                     client_socket.send(encodeMessage("270 SIG\n"))
-                    client_socket.send(hashMessage(message, key) + '\n')
+                    client_socket.send(hashMessage(message, key))
                     output = decodeMessage(client_socket.recv(1024))
                     print(output)
                     if output == 'PASS' or output == 'FAIL':
