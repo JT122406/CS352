@@ -28,8 +28,8 @@ def encodeMessage(toEncode):
 if __name__ == "__main__":
     server_socket = serverStart(socket, int(sys.argv[1]), 'localhost')
     keys = getKeys()
+    client_socket, client_address = server_socket.accept()
     try:
-        client_socket, client_address = server_socket.accept()
         if decodeMessage(client_socket.recv(1024)) != 'HELLO':
             print("Error: Invalid message")
             client_socket.close()
@@ -38,37 +38,39 @@ if __name__ == "__main__":
         client_socket.send(encodeMessage("260 OK\n"))  # Everything UP to here works perfectly
 
         while True:
-            match decodeMessage(client_socket.recv(1024)):
-                case 'DATA':
-                    for keys1 in keys:
-                        message = decodeMessage(client_socket.recv(1024))
-                        if message == '\\.\\r\\n':
-                            break
-                        client_socket.send(encodeMessage("270 SIG\n"))
-                        sha256_hash = hashlib.sha256()
-                        sha256_hash.update(encodeMessage(message))
-                        sha256_hash.update(encodeMessage(keys1))
-                        client_socket.send(encodeMessage(sha256_hash.hexdigest() + '\n'))
+            i = 0
+            command = decodeMessage(client_socket.recv(1024))
+            if command == 'DATA':
+                print("DATA")
+                message = decodeMessage(client_socket.recv(1024))
+                if message == '\\.\\r\\n':
+                    break
+                client_socket.send(encodeMessage("270 SIG\n"))
+                sha256_hash = hashlib.sha256()
+                sha256_hash.update(encodeMessage(message))
+                sha256_hash.update(encodeMessage(keys[i]))
+                client_socket.send(encodeMessage(sha256_hash.hexdigest() + '\n'))
 
-                        message = client_socket.recv(1024).decode('ascii').strip()
-                        if message == 'PASS' or message == 'FAIL':
-                            client_socket.send(encodeMessage("260 OK\n"))
-                        else:
-                            print("error")
-                            server_socket.close()
-                            client_socket.close()
-                            exit()
-
-                case 'QUIT':
-                    client_socket.close()
+                message = client_socket.recv(1024).decode('ascii').strip()
+                if message == 'PASS' or message == 'FAIL':
+                    client_socket.send(encodeMessage("260 OK\n"))
+                    i += 1
+                else:
+                    print("error")
                     server_socket.close()
-                    exit(1)
-                case _:
-                    print("Error: Invalid message")
                     client_socket.close()
-                    server_socket.close()
                     exit()
+            elif command == 'QUIT':
+                client_socket.close()
+                server_socket.close()
+                exit(1)
+            else:
+                print("Error: Invalid message")
+                client_socket.close()
+                server_socket.close()
+                exit()
     except Exception as e:
         print(e)
         server_socket.close()
+        client_socket.close()
         exit()
