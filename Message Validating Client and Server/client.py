@@ -30,7 +30,7 @@ if __name__ == "__main__":
     # for line in Lines:
     # bytesT = bytes(line, 'ascii')
     with open(messageFileName, 'r') as file:
-        message = [line.strip().encode() for line in file]
+        message = [line.strip() for line in file]
     with open(signatureFileName, 'r') as s_file:
         signature = [line.strip() for line in s_file]
 
@@ -42,16 +42,17 @@ if __name__ == "__main__":
             print("Error: Server response not as expected")
             exit(1)
 
-        message_counter = 0
-        for message, signature in zip(message, signature):
+        message_counter = 1
+        for messages in message:
             client_socket.send("DATA\n".encode('ascii'))
-            client_socket.send("Ethernet cables are like the roads of the Internet, carrying data traffic to its destinations.".encode('ascii'))
+            client_socket.send(message[message_counter].encode('ascii'))
+            #client_socket.send("Ethernet cables are like the roads of the Internet, carrying data traffic to its destinations.".encode('ascii'))
             response = client_socket.recv(1024).decode('ascii').strip()
             print(response)
             if response != "270 SIG":
                 print("Error: Server response not as expected 1")
                 exit(1)
-            server_signature = client_socket.recv(1024).decode().strip()
+            server_signature = client_socket.recv(1024).decode('ascii').strip()
             if server_signature == signature:
                 client_socket.send("PASS\n".encode('ascii'))
             else:
@@ -60,7 +61,7 @@ if __name__ == "__main__":
             if response != "260 OK":
                 print("Error: Server response not as expected 2")
                 exit(1)
-            message_counter += 1
+            message_counter += 2
         client_socket.send("QUIT\n".encode('ascii'))
         response = client_socket.recv(1024).decode('ascii').strip()
         if response != "260 OK":
