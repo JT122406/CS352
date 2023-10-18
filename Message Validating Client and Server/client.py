@@ -11,7 +11,7 @@ def startClient(address, port):
         try:
             socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             socket1.connect((address, port))
-            #print("Connection to: ", address, ":", port)
+            print("Connection to: ", address, ":", port)
             connected = True
         except Exception:
             pass

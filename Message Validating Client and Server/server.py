@@ -18,7 +18,9 @@ def getKeys():
 
 
 def decodeMessage(toDecode):
-    return toDecode.decode('ascii').strip()
+    this = toDecode.decode('ascii').strip()
+    print(this)
+    return this
 
 
 def encodeMessage(toEncode):
@@ -29,6 +31,7 @@ if __name__ == "__main__":
     server_socket = serverStart(socket, int(sys.argv[1]), 'localhost')
     keys = getKeys()
     client_socket, client_address = server_socket.accept()
+    client_socket.settimeout(10)
     try:
         if decodeMessage(client_socket.recv(1024)) != 'HELLO':
             print("Error: Invalid message")
@@ -41,17 +44,14 @@ if __name__ == "__main__":
             i = 0
             command = decodeMessage(client_socket.recv(1024))
             if command == 'DATA':
-                print("DATA")
                 message = decodeMessage(client_socket.recv(1024))
-                if message == '\\.\\r\\n':
-                    break
                 client_socket.send(encodeMessage("270 SIG\n"))
                 sha256_hash = hashlib.sha256()
                 sha256_hash.update(encodeMessage(message))
                 sha256_hash.update(encodeMessage(keys[i]))
                 client_socket.send(encodeMessage(sha256_hash.hexdigest() + '\n'))
 
-                message = client_socket.recv(1024).decode('ascii').strip()
+                message = decodeMessage(client_socket.recv(1024))
                 if message == 'PASS' or message == 'FAIL':
                     client_socket.send(encodeMessage("260 OK\n"))
                     i += 1
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                 server_socket.close()
                 exit(1)
             else:
-                print("Error: Invalid message")
+                print("Error: Invalid message else")
                 client_socket.close()
                 server_socket.close()
                 exit()
