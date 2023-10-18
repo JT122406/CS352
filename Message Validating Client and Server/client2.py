@@ -9,6 +9,7 @@ def startClient(address, port):
         try:
             socket1 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             socket1.connect((address, port))
+            print("Connection to: ", address, ":", port)
             connected = True
         except Exception:
             pass
@@ -37,40 +38,42 @@ def decodeMessage(toDecode):
 
 
 def encodeMessage(toEncode):
-    return toEncode.encode('ascii')
+    return (toEncode + '\n').encode('ascii')
 
 
-def main(socket):
+def main():
+    socket1 = startClient(sys.argv[1], int(sys.argv[2]))
     messages = getMessages(sys.argv[3])
     signatures = getSignatures(sys.argv[4])
     try:
-        socket.send(encodeMessage("HELLO"))
-        if decodeMessage(socket.recv(1024)) != "260 OK":
+        socket1.send(encodeMessage("HELLO"))
+        if decodeMessage(socket1.recv(1024)) != "260 OK":
             print("Error: Server response not as expected")
-            socket.close()
+            socket1.close()
             exit(1)
 
         for message in messages:
-            socket.send(encodeMessage("DATA"))
-            socket.send(encodeMessage(message))
-            response = decodeMessage(socket.recv(1024))
+            print("Sending message: " + message)
+            socket1.send(encodeMessage("DATA"))
+            socket1.send(encodeMessage(message))
+            response = decodeMessage(socket1.recv(1024))
             if response != '270 SIG':
                 print("Error: Server response not as expected")
-                socket.close()
+                socket1.close()
                 exit(1)
-            response2 = decodeMessage(socket.recv(1024))
+            response2 = decodeMessage(socket1.recv(1024))
             if response2 == signatures[messages.index(message)]:
-                socket.send(encodeMessage("PASS"))
+                socket1.send(encodeMessage("PASS"))
             else:
-                socket.send(encodeMessage("FAIL"))
+                socket1.send(encodeMessage("FAIL"))
 
-            response3 = decodeMessage(socket.recv(1024))
+            response3 = decodeMessage(socket1.recv(1024))
             if response3 != "260 OK":
                 print("Error: Server response not as expected")
-                socket.close()
+                socket1.close()
                 exit(1)
 
-        socket.send(encodeMessage("QUIT"))
+        socket1.send(encodeMessage("QUIT"))
 
     except Exception as e:
         print(e)
@@ -79,4 +82,5 @@ def main(socket):
 
 
 if __name__ == "__main__":
-    main(startClient(sys.argv[1], sys.argv[2]))
+    print("Starting client")
+    main()
