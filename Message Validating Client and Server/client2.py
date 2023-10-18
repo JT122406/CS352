@@ -1,5 +1,6 @@
 import socket
 import sys
+from time import sleep
 
 
 def startClient(address, port):
@@ -55,6 +56,7 @@ def main():
 
         for message in messages:
             socket1.send(encodeMessage("DATA"))
+            sleep(0.1)
             socket1.send(encodeMessage(message))
             response = decodeMessage(socket1.recv(1024))
             print(response)

@@ -44,7 +44,7 @@ def main():
             print(command)
             if command == 'DATA':
                 message = decodeMessage(client_socket.recv(1024))
-                print(message)
+                print(message + '\n.')
                 client_socket.send(encodeMessage("270 SIG\n"))
                 sha256_hash = hashlib.sha256()
                 sha256_hash.update(encodeMessage(message))
