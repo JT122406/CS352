@@ -51,9 +51,9 @@ def main():
                 print(command)
                 if command == 'DATA':
                     message = decodeMessage(client_socket.recv(1024))
-                    print(message + '\n.')
+                    print(message)
                     client_socket.send(encodeMessage("270 SIG\n"))
-                    client_socket.send(hashMessage(message, key))
+                    client_socket.send(hashMessage(message[:-2], key))
                     output = decodeMessage(client_socket.recv(1024))
                     print(output)
                     if output == 'PASS' or output == 'FAIL':

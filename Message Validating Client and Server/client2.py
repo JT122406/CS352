@@ -57,7 +57,7 @@ def main():
         for message in messages:
             socket1.send(encodeMessage("DATA"))
             sleep(0.1)
-            socket1.send(encodeMessage(message))
+            socket1.send(encodeMessage(message + "\n."))
             response = decodeMessage(socket1.recv(1024))
             print(response)
             if response != '270 SIG':
