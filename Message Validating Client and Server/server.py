@@ -50,16 +50,23 @@ def main():
                 command = decodeMessage(client_socket.recv(1024))
                 print(command)
                 if command == 'DATA':
-                    message = decodeMessage(client_socket.recv(1024))
+                    message = ''
+                    while True:
+                        chars = client_socket.recv(1).decode('ascii')
+                        if chars == '.':
+                            break
+                        else:
+                            message += chars
+                    client_socket.recv(1024)
                     print(message)
                     client_socket.send(encodeMessage("270 SIG\n"))
-                    client_socket.send(hashMessage(message[:-2], key))
+                    client_socket.send(hashMessage(message, key))
                     output = decodeMessage(client_socket.recv(1024))
                     print(output)
                     if output == 'PASS' or output == 'FAIL':
                         client_socket.send(encodeMessage("260 OK\n"))
                     else:
-                        print("Error: Invalid message")
+                        print("Error: Invalid message here?")
                         client_socket.close()
                         server_socket.close()
                         exit()
