@@ -82,7 +82,7 @@ def main():
 
     except Exception as e:
         print(e)
-        socket.close()
+        socket1.close()
         exit(1)
 
 
