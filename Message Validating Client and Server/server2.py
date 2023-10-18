@@ -25,6 +25,13 @@ def encodeMessage(toEncode):
     return toEncode.encode('ascii')
 
 
+def hashMessage(message, key):
+    hash = hashlib.sha256()
+    hash.update(encodeMessage(message))
+    hash.update(encodeMessage(key))
+    return hash.hexdigest()
+
+
 def main():
     server_socket = serverStart(socket, int(sys.argv[1]), 'localhost')
     keys = getKeys()
@@ -46,11 +53,7 @@ def main():
                 message = decodeMessage(client_socket.recv(1024))
                 print(message + '\n.')
                 client_socket.send(encodeMessage("270 SIG\n"))
-                sha256_hash = hashlib.sha256()
-                sha256_hash.update(encodeMessage(message))
-                sha256_hash.update(encodeMessage(key))
-                client_socket.send(encodeMessage(sha256_hash.hexdigest() + '\n'))
-
+                client_socket.send(hashMessage(message, key) + '\n')
                 output = decodeMessage(client_socket.recv(1024))
                 print(output)
                 if output == 'PASS' or output == 'FAIL':
