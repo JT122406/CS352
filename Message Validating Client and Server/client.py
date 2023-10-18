@@ -52,9 +52,9 @@ if __name__ == "__main__":
                 exit(1)
             server_signature = client_socket.recv(1024).decode().strip()
             if server_signature == signature:
-                client_socket.send(b"PASS\n")
+                client_socket.send("PASS\n")
             else:
-                client_socket.send(b"FAIL\n")
+                client_socket.send("FAIL\n")
             response = client_socket.recv(1024).decode().strip()
             if response != "260 OK":
                 print("Error: Server response not as expected")
