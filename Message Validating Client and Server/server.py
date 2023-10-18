@@ -17,13 +17,21 @@ def getKeys():
         return [line.strip() for line in file.readlines()]
 
 
+def decodeMessage(toDecode):
+    return toDecode.decode('ascii').strip()
+
+
+def encodeMessage(toEncode):
+    return toEncode.encode('ascii')
+
+
 if __name__ == "__main__":
     server_socket = serverStart(socket, int(sys.argv[1]), 'localhost')
     keys = getKeys()
     print(keys)
     try:
         client_socket, client_address = server_socket.accept()
-        one = client_socket.recv(1024).decode('ascii').strip()
+        one = decodeMessage(client_socket.recv(1024))
         print(one)
         print("Connection from: ", client_address)
         if one != 'HELLO':
@@ -35,22 +43,22 @@ if __name__ == "__main__":
         while True:
             i = 0
             print("Waiting for message")
-            string1 = client_socket.recv(1024).decode('ascii').strip()
+            string1 = decodeMessage(client_socket.recv(1024))
             print(string1)
             match string1:
                 case 'DATA':
                     while True:
                         sha256_hash = hashlib.sha256()
-                        message = client_socket.recv(1024).decode('ascii').strip()
+                        message = decodeMessage(client_socket.recv(1024))
                         if message == '.':
                             break
-                        sha256_hash.update(message.encode('ascii'))
-                        sha256_hash.update(keys[i].encode('ascii'))
+                        sha256_hash.update(encodeMessage(message))
+                        sha256_hash.update(encodeMessage(keys[i]))
                         i += 1
                         sign = sha256_hash.hexdigest()
                         print(sign)
-                        client_socket.send("270SIG\n".encode('ascii'))
-                        client_socket.send((sign + "\n").encode('ascii'))
+                        client_socket.send(encodeMessage("270 SIG\n"))
+                        client_socket.send(encodeMessage(sign + '\n'))
 
                         message = client_socket.recv(1024).decode('ascii').strip()
                         if message != 'PASS' and message != 'FAIL':
@@ -58,7 +66,7 @@ if __name__ == "__main__":
                             client_socket.close()
                             exit()
                         else:
-                            client_socket.send("260OK\n".encode('ascii'))
+                            client_socket.send(encodeMessage("260 OK\n"))
                 case 'QUIT':
                     server_socket.close()
                     exit()
