@@ -55,15 +55,18 @@ if __name__ == "__main__":
                             client_socket.send(encodeMessage("260 OK\n"))
                         else:
                             print("error")
+                            server_socket.close()
                             client_socket.close()
                             exit()
 
                 case 'QUIT':
+                    client_socket.close()
                     server_socket.close()
                     exit(1)
                 case _:
                     print("Error: Invalid message")
                     client_socket.close()
+                    server_socket.close()
                     exit()
     except Exception as e:
         print(e)
