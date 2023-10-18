@@ -47,27 +47,31 @@ def main():
     signatures = getSignatures(sys.argv[4])
     try:
         socket1.send(encodeMessage("HELLO"))
-        if decodeMessage(socket1.recv(1024)) != "260 OK":
+        reception = decodeMessage(socket1.recv(1024))
+        print(reception)
+        if reception != "260 OK":
             print("Error: Server response not as expected")
             socket1.close()
             exit(1)
 
         for message in messages:
-            print("Sending message: " + message)
             socket1.send(encodeMessage("DATA"))
             socket1.send(encodeMessage(message))
             response = decodeMessage(socket1.recv(1024))
+            print(response)
             if response != '270 SIG':
                 print("Error: Server response not as expected")
                 socket1.close()
                 exit(1)
             response2 = decodeMessage(socket1.recv(1024))
+            print(response2)
             if response2 == signatures[messages.index(message)]:
                 socket1.send(encodeMessage("PASS"))
             else:
                 socket1.send(encodeMessage("FAIL"))
 
             response3 = decodeMessage(socket1.recv(1024))
+            print(response3)
             if response3 != "260 OK":
                 print("Error: Server response not as expected")
                 socket1.close()
