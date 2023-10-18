@@ -60,7 +60,7 @@ if __name__ == "__main__":
                 print("Error: Server response not as expected")
                 exit(1)
             message_counter += 1
-        client_socket.send(b"QUIT\n")
+        client_socket.send("QUIT\n")
         response = client_socket.recv(1024).decode().strip()
         if response != "260 OK":
             print("Error: Server response not as expected")
