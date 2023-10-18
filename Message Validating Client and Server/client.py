@@ -41,14 +41,10 @@ if __name__ == "__main__":
         if response != "260 OK":
             print("Error: Server response not as expected")
             exit(1)
-        else:
-            print(response)
-            exit(1)
-
 
         message_counter = 0
         for message, signature in zip(message, signature):
-            client_socket.send(b"DATA\n")
+            client_socket.send("DATA\n".encode('ascii'))
             client_socket.send(message)
             response = client_socket.recv(1024).decode().strip()
             if response != "270 SIG":
