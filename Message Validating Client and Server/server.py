@@ -29,7 +29,7 @@ def hashMessage(message, key):
     hash = hashlib.sha256()
     hash.update(encodeMessage(message))
     hash.update(encodeMessage(key))
-    return encodeMessage(hash.hexdigest())
+    return hash.hexdigest()
 
 
 def main():
@@ -44,20 +44,37 @@ def main():
             client_socket.close()
             exit()
 
-        client_socket.send(encodeMessage("260 OK\n"))
+        client_socket.sendall(encodeMessage("260 OK\n"))
         while True:
             for key in keys:
                 command = decodeMessage(client_socket.recv(1024))
                 print(command)
                 if command == 'DATA':
-                    message = decodeMessage(client_socket.recv(1024))
-                    print(message)
-                    client_socket.send(encodeMessage("270 SIG\n"))
-                    client_socket.send(hashMessage(message[:-2], key))
+                    lines = []
+                    while True:
+                        messageMaker = bytearray()
+                        while True:
+                            chars = client_socket.recv(1)
+                            if not chars:
+                                break
+                            messageMaker.extend(chars)
+                            if chars == b'\n':
+                                break
+
+                        message = decodeMessage(messageMaker)
+                        if message == "." or message == "\\.":
+                            break
+                        unescaped = message.replace('\\\\', '\\').replace('\\.', '.')
+                        lines.append(unescaped)
+                        print(message)
+
+                    final = "\n".join(lines)
+                    client_socket.sendall(encodeMessage("270 SIG\n"))
+                    client_socket.sendall(f"{hashMessage(final, key)}\n".encode())
                     output = decodeMessage(client_socket.recv(1024))
                     print(output)
                     if output == 'PASS' or output == 'FAIL':
-                        client_socket.send(encodeMessage("260 OK\n"))
+                        client_socket.sendall(encodeMessage("260 OK\n"))
                     else:
                         print("Error: Invalid message")
                         client_socket.close()
