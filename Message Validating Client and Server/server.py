@@ -76,7 +76,7 @@ def main():
                     if output == 'PASS' or output == 'FAIL':
                         client_socket.sendall(encodeMessage("260 OK\n"))
                     else:
-                        print("Error: Invalid message here?")
+                        print("Error: Invalid message")
                         client_socket.close()
                         server_socket.close()
                         exit()
