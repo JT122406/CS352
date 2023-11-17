@@ -1,5 +1,7 @@
 import socket
 import sys
+import json
+import hashlib
 
 
 def serverStart(socket1, port, address):
@@ -7,6 +9,17 @@ def serverStart(socket1, port, address):
     socketserver.bind((address, port))
     socketserver.listen(1)
     return socketserver
+
+
+def authenticateUser(user, password, file):
+    with open(file) as json_file:
+        data = json.load(json_file)
+    for name, values in data.items():
+        if name == user:
+            if hashlib.sha256(password.encode('utf-8')).hexdigest() == values["password"]:
+                return True
+
+    return False
 
 
 def main():
