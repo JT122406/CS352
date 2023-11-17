@@ -14,9 +14,10 @@ def serverStart(socket1, port, address):
 def authenticateUser(user, password, file):
     with open(file) as json_file:
         data = json.load(json_file)
-    for name, value in data.items():
+    for name in data.items():
         if name == user:
-            if hashlib.sha256(password.encode('utf-8')).hexdigest() == value:
+            values = data.get(name, [])
+            if values[0] == hashlib.sha256(password + values[1]).hexdigest():
                 return True
 
     return False
