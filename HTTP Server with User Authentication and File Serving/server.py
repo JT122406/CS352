@@ -23,6 +23,11 @@ def authenticateUser(user, password, file):
     return False
 
 
+def ok(socket):
+    socket.send("HTTP/1.1 200 OK\r\n\r\n")
+    return
+
+
 def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1])
     file = open(sys.argv[3], "r")
