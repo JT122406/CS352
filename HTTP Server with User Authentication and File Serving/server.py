@@ -1,6 +1,6 @@
 import hashlib
 import json
-import secrets
+import random
 import socket
 import sys
 from http import cookies
@@ -25,8 +25,8 @@ def authenticateUser(user, password, file):
     return False
 
 
-def ok(socket):
-    socket.send("HTTP/1.1 200 OK\r\n\r\n")
+def ok(sock):
+    sock.send("HTTP/1.1 200 OK\r\n\r\n")
     return
 
 
@@ -39,11 +39,10 @@ def main():
     ## post receive
     if authenticateUser("user", "password", file):
         cookie = cookies.SimpleCookie()
-        cookie['sessionID'] = secrets.token_hex(8)
+        cookie['sessionID'] = format(random.getrandbits(64), '016x')
         ok(server_socket)
     else:
         ok(server_socket)
-
 
 
 if __name__ == "__main__":
