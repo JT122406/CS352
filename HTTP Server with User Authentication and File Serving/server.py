@@ -1,7 +1,9 @@
+import hashlib
+import json
+import secrets
 import socket
 import sys
-import json
-import hashlib
+from http import cookies
 
 
 def serverStart(socket1, port, address):
@@ -33,6 +35,15 @@ def main():
     file = open(sys.argv[3], "r")
     timeout = sys.argv[4]
     userDirect = sys.argv[5]
+
+    ## post receive
+    if authenticateUser("user", "password", file):
+        cookie = cookies.SimpleCookie()
+        cookie['sessionID'] = secrets.token_hex(8)
+        ok(server_socket)
+    else:
+        ok(server_socket)
+
 
 
 if __name__ == "__main__":
