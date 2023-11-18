@@ -1,9 +1,9 @@
+import datetime
 import hashlib
 import json
 import random
 import socket
 import sys
-from http import cookies
 
 
 def serverStart(socket1, port, address):
@@ -30,6 +30,15 @@ def ok(sock):
     return
 
 
+def createCookie(id1):
+    coookiedata = {
+        id1: format(random.getrandbits(64), '016x'),
+        'timestamp': datetime.datetime.now(datetime.UTC)
+    }
+
+    return json.dumps(coookiedata)
+
+
 def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1])
     file = open(sys.argv[3], "r")
@@ -38,8 +47,7 @@ def main():
 
     ## post receive
     if authenticateUser("user", "password", file):
-        cookie = cookies.SimpleCookie()
-        cookie['sessionID'] = format(random.getrandbits(64), '016x')
+        cookie = createCookie('sessionID')
         ok(server_socket)
     else:
         ok(server_socket)
