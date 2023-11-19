@@ -16,17 +16,16 @@ def serverStart(socket1, port, address):
 def authenticateUser(user, password, file):
     with open(file) as json_file:
         data = json.load(json_file)
-    for name in data.items():
-        if name == user:
-            values = data.get(name, [])
-            if values[0] == hashlib.sha256(password + values[1]).hexdigest():
-                return True
+
+    if user in data:
+        if data[user][0] == hashlib.sha256(password + user[1]).hexdigest():
+            return True
 
     return False
 
 
 def ok(sock):
-    sock.send("HTTP/1.1 200 OK\r\n\r\n")
+    sock.send("HTTP/1.0 200 OK\r\n\r\n")
     return
 
 
