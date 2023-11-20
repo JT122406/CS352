@@ -13,6 +13,34 @@ def serverStart(socket1, port, address, timeout):
     socketserver.settimeout(timeout)
     return socketserver
 
+def handle_post_request(connection):
+    return
+def handle_get_request(connection):
+    return
+
+def listen(socket2):
+    while True:
+        connection = None
+        try:
+            connection, client_address = socket2.accept()
+
+            data = connection.recv(1024).decode()
+            if not data: break
+
+            http_method, request_target, http_version = data.split()[:3]
+
+            if http_method == "POST" and request_target == "/":
+                handle_post_request(connection)
+            elif http_method == "GET":
+                handle_get_request(connection)
+            else:
+                # Send HTTP status "501 NotImplemented"
+                response = "HTTP/1.1 501 NotImplemented\r\n\r\n"
+                connection.sendall(response.encode())
+        finally:
+            if connection:
+                connection.close()
+
 
 def authenticateUser(user, password, file):
     with open(file) as json_file:
@@ -31,12 +59,10 @@ def ok(sock):
 
 
 def createCookie(id1):
-    coookiedata = {
+    return json.dumps({
         id1: format(random.getrandbits(64), '016x'),
         'timestamp': datetime.datetime.now(datetime.UTC)
-    }
-
-    return json.dumps(coookiedata)
+    })
 
 
 def logger(message):
