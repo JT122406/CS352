@@ -14,7 +14,7 @@ def serverStart(socket1, port, address, timeout):
     return socketserver
 
 
-def post_request(connection, data):
+def post_request(connection):
     request_data = connection.recv(1024).decode()
     headers = request_data.split("\r\n")
     username = None
@@ -33,7 +33,7 @@ def post_request(connection, data):
 
     if authenticateUser(username, password, open(sys.argv[3], "r")):
         cookie = createCookie(username)
-        connection.sendall(("HTTP/1.0 200 OK\r\n\r\n " + cookie).encode())
+        ok(connection, cookie)
         logger("LOGIN SUCCESSFUL: " + username + ":" + password)
 
     else:
@@ -60,7 +60,7 @@ def listen(socket2):
             http_method, request_target, http_version = data.split()[:3]
 
             if http_method == "POST" and request_target == '/':
-                post_request(connection, data)
+                post_request(connection)
             elif http_method == "GET":
                 get_request(connection, data)
             else:
@@ -75,8 +75,7 @@ def authenticateUser(user, password, file):
         data = json.load(json_file)
 
     if user in data:
-        if data[user][0] == hashlib.sha256(password + user[1]).hexdigest():
-            return True
+        return data[user][0] == hashlib.sha256(password + user[1]).hexdigest()
 
     return False
 
@@ -102,13 +101,7 @@ def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
     userDirect = sys.argv[5]
     listen(server_socket)
-    ## post receive
-    if authenticateUser("user", "password", file):
-        cookie = createCookie('sessionID')
-        logger("LOGIN SUCCESSFUL: " + "user" + ":" + "password")
-        ok(server_socket)
-    else:
-        ok(server_socket)
+
 
 
 if __name__ == "__main__":
