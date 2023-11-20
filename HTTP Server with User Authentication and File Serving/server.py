@@ -38,6 +38,11 @@ def createCookie(id1):
     return json.dumps(coookiedata)
 
 
+def logger(message):
+    print("SERVERLOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
+    print('\n')
+
+
 def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1])
     file = open(sys.argv[3], "r")
