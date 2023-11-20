@@ -15,6 +15,31 @@ def serverStart(socket1, port, address, timeout):
 
 
 def post_request(connection, data):
+    request_data = connection.recv(1024).decode()
+    headers = request_data.split("\r\n")
+    username = None
+    password = None
+
+    for header in headers:
+        if header.startswith("username:"):
+            username = header.split(":")[1].strip()
+        elif header.startswith("password:"):
+            password = header.split(":")[1].strip()
+
+    if username is None or password is None:
+        connection.sendall("HTTP/1.0 400 Bad Request\r\n\r\n".encode())
+        logger("LOGIN FAILED: Missing username or password")
+        return
+
+    if authenticateUser(username, password, open(sys.argv[3], "r")):
+        cookie = createCookie(username)
+        connection.sendall(("HTTP/1.0 200 OK\r\n\r\n " + cookie).encode())
+        logger("LOGIN SUCCESSFUL: " + username + ":" + password)
+
+    else:
+        connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
+        logger("LOGIN FAILED: " + username + ":" + password)
+
     return
 
 
@@ -75,7 +100,6 @@ def logger(message):
 
 def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
-    file = open(sys.argv[3], "r")
     userDirect = sys.argv[5]
     listen(server_socket)
     ## post receive
