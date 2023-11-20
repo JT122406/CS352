@@ -13,10 +13,14 @@ def serverStart(socket1, port, address, timeout):
     socketserver.settimeout(timeout)
     return socketserver
 
-def handle_post_request(connection):
+
+def post_request(connection, data):
     return
-def handle_get_request(connection):
+
+
+def get_request(connection, data):
     return
+
 
 def listen(socket2):
     while True:
@@ -25,18 +29,17 @@ def listen(socket2):
             connection, client_address = socket2.accept()
 
             data = connection.recv(1024).decode()
-            if not data: break
+            if not data:
+                break
 
             http_method, request_target, http_version = data.split()[:3]
 
-            if http_method == "POST" and request_target == "/":
-                handle_post_request(connection)
+            if http_method == "POST" and request_target == '/':
+                post_request(connection, data)
             elif http_method == "GET":
-                handle_get_request(connection)
+                get_request(connection, data)
             else:
-                # Send HTTP status "501 NotImplemented"
-                response = "HTTP/1.1 501 NotImplemented\r\n\r\n"
-                connection.sendall(response.encode())
+                connection.sendall("HTTP/1.0 501 NotImplemented\r\n\r\n".encode())
         finally:
             if connection:
                 connection.close()
@@ -53,8 +56,8 @@ def authenticateUser(user, password, file):
     return False
 
 
-def ok(sock):
-    sock.send("HTTP/1.0 200 OK\r\n\r\n")
+def ok(sock, message):
+    sock.sendall(("HTTP/1.0 200 OK\r\n\r\n " + message).encode())
     return
 
 
@@ -74,7 +77,7 @@ def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
     file = open(sys.argv[3], "r")
     userDirect = sys.argv[5]
-
+    listen(server_socket)
     ## post receive
     if authenticateUser("user", "password", file):
         cookie = createCookie('sessionID')
