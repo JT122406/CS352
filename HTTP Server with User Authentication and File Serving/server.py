@@ -6,10 +6,11 @@ import socket
 import sys
 
 
-def serverStart(socket1, port, address):
+def serverStart(socket1, port, address, timeout):
     socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
     socketserver.bind((address, port))
     socketserver.listen(1)
+    socketserver.settimeout(timeout)
     return socketserver
 
 
@@ -44,14 +45,14 @@ def logger(message):
 
 
 def main():
-    server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1])
+    server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
     file = open(sys.argv[3], "r")
-    timeout = sys.argv[4]
     userDirect = sys.argv[5]
 
     ## post receive
     if authenticateUser("user", "password", file):
         cookie = createCookie('sessionID')
+        logger("LOGIN SUCCESSFUL: " + "user" + ":" + "password")
         ok(server_socket)
     else:
         ok(server_socket)
