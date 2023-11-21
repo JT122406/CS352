@@ -5,6 +5,12 @@ import random
 import socket
 import sys
 
+sessions = {}
+
+
+def logger(message):
+    print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
+
 
 def serverStart(socket1, port, address, timeout):
     socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
@@ -37,6 +43,7 @@ def post_request(connection, data):
         cookie = createCookie()
         send_http_status(connection, "200 OK", "Logged in!")
         # ok(connection, cookie)
+        sessions[cookie] = ({username: datetime.datetime.now()})
         return username
     elif varthing[1] == 1:
         logger("LOGIN FAILED: wronguser : " + password)
@@ -47,29 +54,27 @@ def post_request(connection, data):
         connection.close()
 
 
-def get_request(connection, data, users):
+def get_request(connection, data):
     headers = data.split("\r\n")
     for header in headers:
         if header.startswith("sessionID"):
-            ## do the things by getting time and such
+            number = header.split(":")[1].strip()
+            if sessions.keys().__contains__(number):
+                time = sessions[number][1]
+                userDirect = sys.argv[5] + sessions[number][0]
+                if (datetime.datetime.now() - time).total_seconds() > int(sys.argv[4]):
+                    logger("SESSION EXPIRED: " + sessions[number][0] + " : " + userDirect)
+                    break
 
     connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
 
     ## Get cookie and verify it isn't past timeout
     ## if it is, send 401 and return None
 
-    userDirect = sys.argv[5]
-    userDirects = []
-    for user in users:
-        userDirects.append(userDirect + "/" + user)
-
-
-
     return
 
 
 def listen(socket2):
-    users = []
     while True:
         connection, client_address = socket2.accept()
 
@@ -80,11 +85,9 @@ def listen(socket2):
         http_method, request_target, http_version = data.split()[:3]
 
         if http_method == "POST" and request_target == '/':
-            name = post_request(connection, data)
-            if name is not None:
-                users.append(name)
+            post_request(connection, data)
         elif http_method == "GET":
-            get_request(connection, data, users)
+            get_request(connection, data)
         else:
             connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
 
@@ -125,15 +128,11 @@ def send_http_status(socket9, status_code, status_message):
 
 
 def generate_random_session_id():
-    return format(random.randint(0, 2**64 - 1), 'x')
+    return format(random.randint(0, 2 ** 64 - 1), 'x')
 
 
 def createCookie():
     return {"sessionID": generate_random_session_id()}
-
-
-def logger(message):
-    print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
 
 
 def main():
