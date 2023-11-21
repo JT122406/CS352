@@ -114,7 +114,7 @@ def createCookie(id1):
 
 
 def logger(message):
-    print("SERVERLOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
+    print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
 
 
 def main():
