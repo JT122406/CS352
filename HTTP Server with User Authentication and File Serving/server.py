@@ -43,6 +43,11 @@ def post_request(connection, data):
 
 
 def get_request(connection):
+    cookie = None
+    if cookie is None:
+        connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
+        return None
+
     return
 
 
@@ -84,10 +89,7 @@ def ok(sock, message):
 
 
 def createCookie(id1):
-    return json.dumps({
-        id1: format(random.getrandbits(64), '016x'),
-        'timestamp': datetime.datetime.now(datetime.UTC)
-    })
+    return "Cookie: sessionID=" + format(random.getrandbits(64), '016x')
 
 
 def logger(message):
