@@ -15,8 +15,6 @@ def serverStart(socket1, port, address, timeout):
 
 
 def post_request(connection, data):
-    logger("POST REQUEST")
-
     headers = data.split("\r\n")
     username = None
     password = None
@@ -38,7 +36,7 @@ def post_request(connection, data):
         ok(connection, "Logged in!")
         #ok(connection, cookie)
     else:
-        logger("LOGIN FAILED: " + username + ":" + password)
+        logger("LOGIN FAILED: " + username + " : " + password)
         ok(connection, "Login failed!")
 
 
@@ -61,7 +59,6 @@ def listen(socket2):
             if not data:
                 continue
 
-            print(data)
             http_method, request_target, http_version = data.split()[:3]
 
             if http_method == "POST" and request_target == '/':
