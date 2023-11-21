@@ -53,6 +53,13 @@ def get_request(connection, users):
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
         return None
 
+    userDirect = sys.argv[5]
+    userDirects = []
+    for user in users:
+        userDirects.append(userDirect + "/" + user)
+
+
+
     return
 
 
@@ -122,7 +129,6 @@ def logger(message):
 
 def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
-    ## userDirect = sys.argv[5]
     listen(server_socket)
 
 
