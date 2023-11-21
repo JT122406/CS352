@@ -28,17 +28,18 @@ def post_request(connection, data):
             password = header.split(":")[1].strip()
 
     if username is None or password is None:
-        connection.sendall("HTTP/1.0 400 Bad Request\r\n".encode())
-        logger("LOGIN FAILED: Missing username or password")
+        connection.sendall("HTTP/1.0 501 Not Implemented\r\n".encode())
+        logger("LOGIN FAILED")
         return
     elif authenticateUser(username, password):
         logger("LOGIN SUCCESSFUL: " + username + " : " + password)
 
-        cookie = createCookie(username)
-        ok(connection, cookie)
+        ## cookie = createCookie(username)
+        ok(connection, "Logged in!")
+        #ok(connection, cookie)
     else:
-        connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
         logger("LOGIN FAILED: " + username + ":" + password)
+        ok(connection, "Login failed!")
 
 
 def get_request(connection):
@@ -65,7 +66,8 @@ def listen(socket2):
             else:
                 connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
         finally:
-            connection.close()
+            if connection is not None:
+                connection.close()
 
 
 def authenticateUser(user, password):
