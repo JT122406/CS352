@@ -37,7 +37,7 @@ def post_request(connection, data):
         ## cookie = createCookie(username)
         send_http_status(connection, "200 OK", "Logged in!")
         # ok(connection, cookie)
-        connection.close()
+        return username
     elif varthing[1] == 1:
         logger("LOGIN FAILED: wronguser : " + password)
         send_http_status(connection, "200 OK", "Login failed!")
@@ -47,7 +47,7 @@ def post_request(connection, data):
         connection.close()
 
 
-def get_request(connection):
+def get_request(connection, users):
     cookie = None
     if cookie is None:
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
@@ -57,6 +57,7 @@ def get_request(connection):
 
 
 def listen(socket2):
+    users = []
     while True:
         connection, client_address = socket2.accept()
 
@@ -67,9 +68,11 @@ def listen(socket2):
         http_method, request_target, http_version = data.split()[:3]
 
         if http_method == "POST" and request_target == '/':
-            post_request(connection, data)
+            name = post_request(connection, data)
+            if name is not None:
+                users.append(name)
         elif http_method == "GET":
-            get_request(connection)
+            get_request(connection, users)
         else:
             connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
 
