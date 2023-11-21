@@ -14,18 +14,17 @@ def serverStart(socket1, port, address, timeout):
     return socketserver
 
 
-def post_request(connection):
+def post_request(connection, data):
     logger("POST REQUEST")
-    request_data = connection.recv(1024).decode()
-    logger(request_data)
-    headers = request_data.split("\r\n")
+
+    headers = data.split("\r\n")
     username = None
     password = None
 
     for header in headers:
-        if header.startswith("username:"):
+        if header.startswith("username: "):
             username = header.split(":")[1].strip()
-        elif header.startswith("password:"):
+        elif header.startswith("password: "):
             password = header.split(":")[1].strip()
 
     if username is None or password is None:
@@ -56,10 +55,11 @@ def listen(socket2):
             if not data:
                 continue
 
+            print(data)
             http_method, request_target, http_version = data.split()[:3]
 
             if http_method == "POST" and request_target == '/':
-                post_request(connection)
+                post_request(connection, data)
             elif http_method == "GET":
                 get_request(connection)
             else:
