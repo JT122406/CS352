@@ -15,35 +15,38 @@ def serverStart(socket1, port, address, timeout):
 
 
 def post_request(connection):
-    request_data = connection.recv(1024).decode()
-    headers = request_data.split("\r\n")
+    logger("POST REQUEST")
+    ##request_data = connection.recv(1024).decode()
+    ##logger(request_data)
+    ##headers = request_data.split("\r\n")
     username = None
     password = None
-
+    """
     for header in headers:
         if header.startswith("username:"):
             username = header.split(":")[1].strip()
         elif header.startswith("password:"):
             password = header.split(":")[1].strip()
-
+            """
+    username = "Richard"
+    password = "3TQI8TB39DFIMI6"
     if username is None or password is None:
         connection.sendall("HTTP/1.0 400 Bad Request\r\n\r\n".encode())
         logger("LOGIN FAILED: Missing username or password")
-        return
+        exit(0)
 
-    if authenticateUser(username, password, open(sys.argv[3], "r")):
+    if authenticateUser(username, password):
         cookie = createCookie(username)
         ok(connection, cookie)
         logger("LOGIN SUCCESSFUL: " + username + ":" + password)
-
+        exit(0)
     else:
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
         logger("LOGIN FAILED: " + username + ":" + password)
+        exit(0)
 
-    return
 
-
-def get_request(connection, data):
+def get_request(connection):
     return
 
 
@@ -58,31 +61,32 @@ def listen(socket2):
                 break
 
             http_method, request_target, http_version = data.split()[:3]
+            logger(http_method)
+            logger(request_target)
+            logger(http_version)
 
             if http_method == "POST" and request_target == '/':
                 post_request(connection)
             elif http_method == "GET":
-                get_request(connection, data)
+                get_request(connection)
             else:
-                connection.sendall("HTTP/1.0 501 NotImplemented\r\n\r\n".encode())
+                connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
         finally:
             if connection:
                 connection.close()
 
 
-def authenticateUser(user, password, file):
-    with open(file) as json_file:
+def authenticateUser(user, password):
+    with open(sys.argv[3]) as json_file:
         data = json.load(json_file)
-
     if user in data:
-        return data[user][0] == hashlib.sha256(password + user[1]).hexdigest()
+        return data[user][0] == hashlib.sha256(password.encode() + data[user][1].encode()).hexdigest()
 
     return False
 
 
 def ok(sock, message):
-    sock.sendall(("HTTP/1.0 200 OK\r\n\r\n " + message).encode())
-    return
+    sock.sendall(("HTTP/1.0 200 OK\r\n" + message).encode())
 
 
 def createCookie(id1):
@@ -94,14 +98,12 @@ def createCookie(id1):
 
 def logger(message):
     print("SERVERLOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
-    print('\n')
 
 
 def main():
     server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
     userDirect = sys.argv[5]
     listen(server_socket)
-
 
 
 if __name__ == "__main__":
