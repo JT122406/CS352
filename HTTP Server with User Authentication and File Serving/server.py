@@ -34,7 +34,7 @@ def post_request(connection, data):
     if varthing[0]:
         logger("LOGIN SUCCESSFUL: " + username + " : " + password)
 
-        ## cookie = createCookie(username)
+        cookie = createCookie()
         send_http_status(connection, "200 OK", "Logged in!")
         # ok(connection, cookie)
         return username
@@ -47,11 +47,16 @@ def post_request(connection, data):
         connection.close()
 
 
-def get_request(connection, users):
-    cookie = None
-    if cookie is None:
-        connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
-        return None
+def get_request(connection, data, users):
+    headers = data.split("\r\n")
+    for header in headers:
+        if header.startswith("sessionID"):
+            ## do the things by getting time and such
+
+    connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
+
+    ## Get cookie and verify it isn't past timeout
+    ## if it is, send 401 and return None
 
     userDirect = sys.argv[5]
     userDirects = []
@@ -79,7 +84,7 @@ def listen(socket2):
             if name is not None:
                 users.append(name)
         elif http_method == "GET":
-            get_request(connection, users)
+            get_request(connection, data, users)
         else:
             connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
 
@@ -119,8 +124,12 @@ def send_http_status(socket9, status_code, status_message):
     socket9.sendall(response.encode())
 
 
-def createCookie(id1):
-    return "Cookie: sessionID=" + format(random.getrandbits(64), '016x')
+def generate_random_session_id():
+    return format(random.randint(0, 2**64 - 1), 'x')
+
+
+def createCookie():
+    return {"sessionID": generate_random_session_id()}
 
 
 def logger(message):
