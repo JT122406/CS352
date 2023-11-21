@@ -16,34 +16,30 @@ def serverStart(socket1, port, address, timeout):
 
 def post_request(connection):
     logger("POST REQUEST")
-    ##request_data = connection.recv(1024).decode()
-    ##logger(request_data)
-    ##headers = request_data.split("\r\n")
+    request_data = connection.recv(1024).decode()
+    logger(request_data)
+    headers = request_data.split("\r\n")
     username = None
     password = None
-    """
+
     for header in headers:
         if header.startswith("username:"):
             username = header.split(":")[1].strip()
         elif header.startswith("password:"):
             password = header.split(":")[1].strip()
-            """
-    username = "Richard"
-    password = "3TQI8TB39DFIMI6"
-    if username is None or password is None:
-        connection.sendall("HTTP/1.0 400 Bad Request\r\n\r\n".encode())
-        logger("LOGIN FAILED: Missing username or password")
-        exit(0)
 
-    if authenticateUser(username, password):
+    if username is None or password is None:
+        connection.sendall("HTTP/1.0 400 Bad Request\r\n".encode())
+        logger("LOGIN FAILED: Missing username or password")
+        return
+    elif authenticateUser(username, password):
+        logger("LOGIN SUCCESSFUL: " + username + " : " + password)
+
         cookie = createCookie(username)
         ok(connection, cookie)
-        logger("LOGIN SUCCESSFUL: " + username + ":" + password)
-        exit(0)
     else:
-        connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
+        connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
         logger("LOGIN FAILED: " + username + ":" + password)
-        exit(0)
 
 
 def get_request(connection):
@@ -58,12 +54,9 @@ def listen(socket2):
 
             data = connection.recv(1024).decode()
             if not data:
-                break
+                continue
 
             http_method, request_target, http_version = data.split()[:3]
-            logger(http_method)
-            logger(request_target)
-            logger(http_version)
 
             if http_method == "POST" and request_target == '/':
                 post_request(connection)
@@ -72,8 +65,7 @@ def listen(socket2):
             else:
                 connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
         finally:
-            if connection:
-                connection.close()
+            connection.close()
 
 
 def authenticateUser(user, password):
