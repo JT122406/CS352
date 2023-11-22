@@ -31,7 +31,7 @@ def post_request(connection, data):
             password = header.split(":")[1].strip()
 
     if username is None or password is None:
-        send_http_status(connection, "501 Not Implemented", "")
+        #send_http_status(connection, "501 Not Implemented", "")
         logger("LOGIN FAILED")
         connection.close()
         return
@@ -44,27 +44,34 @@ def post_request(connection, data):
 
         ## send_http_statusmod(connection, "200 OK", "Logged in!", "Set-Cookie: sessionID=" + cookie)
         # ok(connection, cookie)
-        print(cookie)
+        #print(cookie)
         sessions[cookie] = (username, datetime.datetime.now())
         return username
     elif varthing[1] == 1:
         logger("LOGIN FAILED: wronguser : " + password)
         send_http_status(connection, "200 OK", "Login failed!")
     else:
-        logger("LOGIN FAILED: " + username + " : wrongpassword")
+        logger("LOGIN FAILED: " + username + " : " + password)
         send_http_status(connection, "200 OK", "Login failed!")
         connection.close()
 
 
 def get_request(connection, data):
-    print(data)
+    #print(data)
     headers = data.split("\r\n")
     sessionID = None
     target = None
+
+    print(headers)
     for header in headers:
-        if header.startswith("sessionID"):
-            number = header.split(":")[1].strip()
+        print("inside for loop (get_request)")
+        if header.startswith("Cookie: "):
+            print("header starts with sessionID")
+            print(header)
+            number = header.split("=")[1].strip()
+            print("number: " + number)
             if sessions.keys().__contains__(number):
+                print("sessions.keys().__contains__(number)")
                 time = sessions[number][1]
                 userDirect = sys.argv[5] + sessions[number][0]
                 if (datetime.datetime.now() - time).total_seconds() > int(sys.argv[4]):
@@ -81,9 +88,9 @@ def get_request(connection, data):
 
 def listen(socket2):
     while True:
-        print("here")
+        #print("here")
         connection, client_address = socket2.accept()
-        print("after accepting")
+        #print("after accepting")
         data = connection.recv(1024).decode()
         if not data:
             continue
@@ -93,7 +100,7 @@ def listen(socket2):
 
         if http_method == "POST" and request_target == '/':
             post_request(connection, data)
-            print("here")
+            #print("here")
         elif http_method == "GET":
             get_request(connection, data)
         else:
