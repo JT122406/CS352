@@ -62,6 +62,7 @@ def get_request(connection, data):
     sessionID = None
     target = None
     fileName = None
+    response = None
     fileName = headers[0].split()[1]
     print("fileName: " + fileName)
     print(headers)
@@ -86,18 +87,34 @@ def get_request(connection, data):
                     #print("file: " + file.read())
                     try:
                         with open(userDirect + fileName, "r") as file:
-                            print("file: " + file.read())
+                            file_content = file.read()
+                            print("file: " + file_content)
                             #connection.sendall("HTTP/1.0 200 OK\r\n".encode())
                             #connection.sendall(("Content-Type: text/html\r\n").encode())
                             #connection.sendall(("\r\n").encode())
                             #connection.sendall((file.read()).encode())
-                            #logger("FILE SENT: " + sessions[number][0] + " : " + userDirect)
-                            return
+                            #logger("FILE SENT: " + sessions[number][0] + " : " + userDirect+fileName)
+
+                            content_length = len(file_content)
+                            print("content_length: " + content_length)
+                            #response = (
+                            #    "HTTP/1.0 200 OK\r\n"
+                            #    "Content-Type: text/html\r\n"
+                            #    "Content-Length: {len(file_content)}\r\n{file_content}"
+                            #)
+                            response = "HTTP/1.0 200 OK\r\n"
+                            response += file_content + "\r\n"
+                            #connection.sendall(response.encode())
+                            
                     except:
                         print("file not found")
 
-    connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
-
+                        break
+                    break
+    print("outside for loop")
+    #connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
+    print("filecontent: " + file_content)
+    connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" +  file_content + "\r\n") .encode())
     ## Get cookie and verify it isn't past timeout
     ## if it is, send 401 and return None
 
