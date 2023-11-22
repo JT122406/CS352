@@ -104,6 +104,10 @@ def get_request(connection, data):
                         break
                     break
     print("outside for loop")
+    userDirect = sys.argv[5] + sessions[number][0]
+
+    file = open(userDirect + fileName, "r")
+    file_content = file.read()
     # connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
     print("filecontent: " + file_content)
     connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" + file_content + "\r\n").encode())
