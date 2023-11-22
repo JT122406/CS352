@@ -50,69 +50,52 @@ def post_request(connection, data):
 
 
 def get_request(connection, data):
-    # print(data)
     headers = data.split("\r\n")
     sessionID = None
-    target = None
-    response = None
-    fileName = headers[0].split()[1]
-    print("fileName: " + fileName)
-    print(headers)
     for header in headers:
-        print("inside for loop (get_request)")
         if header.startswith("Cookie: "):
-            print("header starts with sessionID")
-            print(header)
-            number = header.split("=")[1].strip()
-            print("number: " + number)
-            if sessions.keys().__contains__(number):
-                print(sessions.keys().__contains__(number))
-                time = sessions[number][1]
-                userDirect = sys.argv[5] + sessions[number][0]
-                print("userDirect: " + userDirect)
-                if (datetime.datetime.now() - time).total_seconds() > int(sys.argv[4]):
-                    logger("SESSION EXPIRED: " + sessions[number][0] + " : " + userDirect)
-                    break
-                else:
-                    print("total directory: " + userDirect + fileName)
-                    # file = open(userDirect + fileName, "r")
-                    # print("file: " + file.read())
-                    try:
-                        with open(userDirect + fileName, "r") as file:
-                            file_content = file.read()
-                            print("file: " + file_content)
-                            # connection.sendall("HTTP/1.0 200 OK\r\n".encode())
-                            # connection.sendall(("Content-Type: text/html\r\n").encode())
-                            # connection.sendall(("\r\n").encode())
-                            # connection.sendall((file.read()).encode())
-                            # logger("FILE SENT: " + sessions[number][0] + " : " + userDirect+fileName)
+            sessionID = header.split("=")[1].strip()
+    #check to see if cookie exists
+    if sessionID is None:
+        connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
+        return
+    #see if cookie exists
+    if sessionID in sessions:
+        #see if cookie is expired
+        time = sessions[sessionID][1]
+        #print(time)
+        #print(datetime.datetime.now())
+        if (datetime.datetime.now() - time).total_seconds() < int(sys.argv[4]):
+            #cookie is valid
+            #update cookie time
+            sessions[sessionID] = (sessions[sessionID][0], datetime.datetime.now())
+            #send file
+            userDirect = sys.argv[5] + sessions[sessionID][0]
+            fileName = headers[0].split()[1]
+            userDirect = userDirect + fileName
+            #attempt to open file
+            try:
+                with open(userDirect, 'r'):
+                    f = open(userDirect, 'r')
+                    logger("GET SUCCEEDED: " + sessions[sessionID][0] + " : " + headers[0].split()[1])
+                    connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" + f.read() + "\r\n").encode())
+                    return
+            except FileNotFoundError:
+                logger("GET FAILED: " + sessions[sessionID][0] + " : " + headers[0].split()[1])
+                connection.sendall("HTTP/1.0 404 Not Found\r\n\r\n".encode())
 
-                            content_length = len(file_content)
-                            print("content_length: " + content_length)
-                            # response = (
-                            #    "HTTP/1.0 200 OK\r\n"
-                            #    "Content-Type: text/html\r\n"
-                            #    "Content-Length: {len(file_content)}\r\n{file_content}"
-                            # )
-                            response = "HTTP/1.0 200 OK\r\n"
-                            response += file_content + "\r\n"
-                            # connection.sendall(response.encode())
-
-                    except:
-                        print("file not found")
-
-                        break
-                    break
-    print("outside for loop")
-    userDirect = sys.argv[5] + sessions[number][0]
-
-    file = open(userDirect + fileName, "r")
-    file_content = file.read()
-    # connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
-    print("filecontent: " + file_content)
-    connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" + file_content + "\r\n").encode())
-    ## Get cookie and verify it isn't past timeout
-    ## if it is, send 401 and return None
+                return
+            return
+        else:
+            #cookie expired
+            logger("SESSION EXPIRED: " + sessions[sessionID][0] + " : " + headers[0].split()[1])
+            connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
+            return
+        return
+    else:
+        logger("COOKIE INVALID: " + headers[0].split()[1])
+        connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
+        return
 
     return
 
