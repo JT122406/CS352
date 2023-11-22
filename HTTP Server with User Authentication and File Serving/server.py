@@ -39,12 +39,7 @@ def post_request(connection, data):
     if varthing[0]:
         logger("LOGIN SUCCESSFUL: " + username + " : " + password)
         cookie = generate_random_session_id()
-        connection.sendall("HTTP/1.0 200 OK\r\n".encode())
-        connection.sendall(("Set-Cookie: sessionID=" + cookie + "\r\n").encode())
-
-        ## send_http_statusmod(connection, "200 OK", "Logged in!", "Set-Cookie: sessionID=" + cookie)
-        # ok(connection, cookie)
-        #print(cookie)
+        connection.sendall("HTTP/1.0 200 OK\r\n" + "Set-Cookie: sessionID=" + cookie + "\r\n\r\nLogged in!")
         sessions[cookie] = (username, datetime.datetime.now())
         return username
     elif varthing[1] == 1:
@@ -61,7 +56,6 @@ def get_request(connection, data):
     headers = data.split("\r\n")
     sessionID = None
     target = None
-    fileName = None
     response = None
     fileName = headers[0].split()[1]
     print("fileName: " + fileName)
