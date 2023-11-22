@@ -61,7 +61,9 @@ def get_request(connection, data):
     headers = data.split("\r\n")
     sessionID = None
     target = None
-
+    fileName = None
+    fileName = headers[0].split()[1]
+    print("fileName: " + fileName)
     print(headers)
     for header in headers:
         print("inside for loop (get_request)")
@@ -71,12 +73,28 @@ def get_request(connection, data):
             number = header.split("=")[1].strip()
             print("number: " + number)
             if sessions.keys().__contains__(number):
-                print("sessions.keys().__contains__(number)")
+                print(sessions.keys().__contains__(number))
                 time = sessions[number][1]
                 userDirect = sys.argv[5] + sessions[number][0]
+                print("userDirect: " + userDirect)
                 if (datetime.datetime.now() - time).total_seconds() > int(sys.argv[4]):
                     logger("SESSION EXPIRED: " + sessions[number][0] + " : " + userDirect)
                     break
+                else:
+                    print("total directory: " + userDirect + fileName)
+                    #file = open(userDirect + fileName, "r")
+                    #print("file: " + file.read())
+                    try:
+                        with open(userDirect + fileName, "r") as file:
+                            print("file: " + file.read())
+                            #connection.sendall("HTTP/1.0 200 OK\r\n".encode())
+                            #connection.sendall(("Content-Type: text/html\r\n").encode())
+                            #connection.sendall(("\r\n").encode())
+                            #connection.sendall((file.read()).encode())
+                            #logger("FILE SENT: " + sessions[number][0] + " : " + userDirect)
+                            return
+                    except:
+                        print("file not found")
 
     connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
 
