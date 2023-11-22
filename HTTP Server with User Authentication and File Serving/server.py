@@ -31,24 +31,21 @@ def post_request(connection, data):
             password = header.split(":")[1].strip()
 
     if username is None or password is None:
-        #send_http_status(connection, "501 Not Implemented", "")
         logger("LOGIN FAILED")
         connection.close()
         return
-    varthing = authenticateUser(username, password)
-    if varthing[0]:
+    authVar = authenticateUser(username, password)
+    if authVar[0]:
         logger("LOGIN SUCCESSFUL: " + username + " : " + password)
         cookie = generate_random_session_id()
         connection.sendall("HTTP/1.0 200 OK\r\n" + "Set-Cookie: sessionID=" + cookie + "\r\n\r\nLogged in!")
         sessions[cookie] = (username, datetime.datetime.now())
-        return username
-    elif varthing[1] == 1:
+    elif authVar[1] == 1:
         logger("LOGIN FAILED: wronguser : " + password)
-        send_http_status(connection, "200 OK", "Login failed!")
+        connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!")
     else:
         logger("LOGIN FAILED: " + username + " : " + password)
-        send_http_status(connection, "200 OK", "Login failed!")
-        connection.close()
+        connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!")
 
 
 def get_request(connection, data):
@@ -129,7 +126,6 @@ def listen(socket2):
 
         if http_method == "POST" and request_target == '/':
             post_request(connection, data)
-            #print("here")
         elif http_method == "GET":
             get_request(connection, data)
         else:
@@ -145,46 +141,6 @@ def authenticateUser(user, password):
         return data[user][0] == hashlib.sha256(password.encode() + data[user][1].encode()).hexdigest(), 0
     else:
         return False, 1
-
-
-def send_http_status(socket9, status_code, status_message):
-    # HTTP response line
-    response_line = f"HTTP/1.0 {status_code} {status_message}\r\n"
-
-    # HTTP headers
-    headers = "Content-Type: text/html\r\n"
-
-    # Empty line to separate headers and body
-    blank_line = "\r\n"
-
-    # HTTP response body (you can customize this)
-    response_body = "<html><body><h1>{}</h1></body></html>".format(status_message)
-
-    # Concatenate the response
-    response = response_line + headers + blank_line + response_body
-
-    # Send the response through the socket
-    socket9.sendall(response.encode())
-
-def send_http_statusmod(socket9, status_code, status_message, mod):
-    # HTTP response line
-    response_line = f"HTTP/1.0 {status_code} {status_message}\r\n"
-
-    # HTTP headers
-    headers = "Content-Type: text/html\r\n"
-
-    # Empty line to separate headers and body
-    blank_line = "\r\n"
-
-    # HTTP response body (you can customize this)
-    response_body = "<html><body><h1>{}</h1></body></html>".format(status_message)
-    response_body2 = "<html><body><h1>{}</h1></body></html>".format(mod)
-
-    # Concatenate the response
-    response = response_line + headers + blank_line + response_body + response_body2
-
-    # Send the response through the socket
-    socket9.sendall(response.encode())
 
 
 def generate_random_session_id():
