@@ -12,7 +12,7 @@ def logger(message):
     print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
 
 
-def serverStart(socket1, port, address, timeout):
+def serverStart(socket1, port, address):
     socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
     socketserver.bind((address, port))
     socketserver.listen(1)
@@ -31,9 +31,10 @@ def post_request(connection, data):
             password = header.split(":")[1].strip()
 
     if username is None or password is None:
+        connection.sendall("HTTP/1.0 501 Not Implemented\r\n\r\n".encode())
         logger("LOGIN FAILED")
-        connection.close()
         return
+
     authVar = authenticateUser(username, password)
     if authVar[0]:
         logger("LOGIN SUCCESSFUL: " + username + " : " + password)
@@ -49,7 +50,7 @@ def post_request(connection, data):
 
 
 def get_request(connection, data):
-    #print(data)
+    # print(data)
     headers = data.split("\r\n")
     sessionID = None
     target = None
@@ -74,38 +75,38 @@ def get_request(connection, data):
                     break
                 else:
                     print("total directory: " + userDirect + fileName)
-                    #file = open(userDirect + fileName, "r")
-                    #print("file: " + file.read())
+                    # file = open(userDirect + fileName, "r")
+                    # print("file: " + file.read())
                     try:
                         with open(userDirect + fileName, "r") as file:
                             file_content = file.read()
                             print("file: " + file_content)
-                            #connection.sendall("HTTP/1.0 200 OK\r\n".encode())
-                            #connection.sendall(("Content-Type: text/html\r\n").encode())
-                            #connection.sendall(("\r\n").encode())
-                            #connection.sendall((file.read()).encode())
-                            #logger("FILE SENT: " + sessions[number][0] + " : " + userDirect+fileName)
+                            # connection.sendall("HTTP/1.0 200 OK\r\n".encode())
+                            # connection.sendall(("Content-Type: text/html\r\n").encode())
+                            # connection.sendall(("\r\n").encode())
+                            # connection.sendall((file.read()).encode())
+                            # logger("FILE SENT: " + sessions[number][0] + " : " + userDirect+fileName)
 
                             content_length = len(file_content)
                             print("content_length: " + content_length)
-                            #response = (
+                            # response = (
                             #    "HTTP/1.0 200 OK\r\n"
                             #    "Content-Type: text/html\r\n"
                             #    "Content-Length: {len(file_content)}\r\n{file_content}"
-                            #)
+                            # )
                             response = "HTTP/1.0 200 OK\r\n"
                             response += file_content + "\r\n"
-                            #connection.sendall(response.encode())
-                            
+                            # connection.sendall(response.encode())
+
                     except:
                         print("file not found")
 
                         break
                     break
     print("outside for loop")
-    #connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
+    # connection.sendall("HTTP/1.0 401 Unauthorized\r\n".encode())
     print("filecontent: " + file_content)
-    connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" +  file_content + "\r\n") .encode())
+    connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" + file_content + "\r\n").encode())
     ## Get cookie and verify it isn't past timeout
     ## if it is, send 401 and return None
 
@@ -114,13 +115,11 @@ def get_request(connection, data):
 
 def listen(socket2):
     while True:
-        #print("here")
         connection, client_address = socket2.accept()
-        #print("after accepting")
         data = connection.recv(1024).decode()
-        if not data:
+        if data is None:
             continue
-        print(data)
+        ## print(data)
 
         http_method, request_target, http_version = data.split()[:3]
 
@@ -129,7 +128,7 @@ def listen(socket2):
         elif http_method == "GET":
             get_request(connection, data)
         else:
-            connection.sendall("HTTP/1.0 501 NotImplemented\r\n".encode())
+            connection.sendall("HTTP/1.0 501 NotImplemented\r\n\r\n".encode())
 
         connection.close()
 
@@ -148,8 +147,7 @@ def generate_random_session_id():
 
 
 def main():
-    server_socket = serverStart(socket, int(sys.argv[2]), sys.argv[1], int(sys.argv[4]))
-    listen(server_socket)
+    listen(serverStart(socket, int(sys.argv[2]), sys.argv[1]))
 
 
 if __name__ == "__main__":
