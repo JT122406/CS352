@@ -42,7 +42,7 @@ def post_request(connection: socket, data: str):
         connection.sendall(("HTTP/1.0 200 OK\r\n" + "Set-Cookie: sessionID=" + cookie + "\r\n\r\nLogged in!").encode())
         sessions[cookie] = (username, datetime.datetime.now())
     elif authVar[1] == 1:  ## User is not found
-        logger("LOGIN FAILED: wronguser : " + password)
+        logger("LOGIN FAILED: " + username + " : " + password)
         connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!".encode())
     else:  ## User is found, but password is wrong
         logger("LOGIN FAILED: " + username + " : " + password)
