@@ -59,7 +59,6 @@ def get_request(connection: socket, data: str):
 
     if sessionID is None:  # No cookie in header
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
-        return
     elif sessionID in sessions:  # Check if cookie matches one from our list
         if (datetime.datetime.now() - sessions[sessionID][1]).total_seconds() < int(
                 sys.argv[4]):  # see if cookie is expired

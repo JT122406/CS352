@@ -3,7 +3,7 @@ import sys
 from time import sleep
 
 
-def startClient(address, port):
+def startClient(address: str, port: int) -> socket.socket:
     socket1 = None
     connected = False
     while not connected:
@@ -17,7 +17,7 @@ def startClient(address, port):
     return socket1
 
 
-def getMessages(file):
+def getMessages(file: str) -> list[str]:
     i = 1
     messages = []
     with open(file, 'r') as file:
@@ -28,16 +28,16 @@ def getMessages(file):
     return messages
 
 
-def getSignatures(file):
+def getSignatures(file: str) -> list[str]:
     with open(file, 'r') as file:
         return [line.strip() for line in file.readlines()]
 
 
-def decodeMessage(toDecode):
+def decodeMessage(toDecode: bytes) -> str:
     return toDecode.decode('ascii').strip()
 
 
-def encodeMessage(toEncode):
+def encodeMessage(toEncode: str) -> bytes:
     return (toEncode + '\n').encode('ascii')
 
 
