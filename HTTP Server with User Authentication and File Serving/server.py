@@ -8,18 +8,18 @@ import sys
 sessions = {}
 
 
-def logger(message):
+def logger(message: str):
     print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
 
 
-def serverStart(socket1, port, address):
+def serverStart(socket1: socket, port: int, address: str):
     socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
     socketserver.bind((address, port))
     socketserver.listen(1)
     return socketserver
 
 
-def post_request(connection, data):
+def post_request(connection: socket, data: str):
     headers = data.split("\r\n")
     username = None
     password = None
@@ -49,64 +49,46 @@ def post_request(connection, data):
         connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!".encode())
 
 
-def get_request(connection, data):
+def get_request(connection: socket, data: str):
     headers = data.split("\r\n")
     sessionID = None
+
     for header in headers:
         if header.startswith("Cookie: "):
             sessionID = header.split("=")[1].strip()
-    #check to see if cookie exists
-    if sessionID is None:
+
+    if sessionID is None:  # No cookie in header
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
         return
-    #see if cookie exists
-    if sessionID in sessions:
-        #see if cookie is expired
-        time = sessions[sessionID][1]
-        #print(time)
-        #print(datetime.datetime.now())
-        if (datetime.datetime.now() - time).total_seconds() < int(sys.argv[4]):
-            #cookie is valid
-            #update cookie time
+    elif sessionID in sessions:  # Check if cookie matches one from our list
+        if (datetime.datetime.now() - sessions[sessionID][1]).total_seconds() < int(
+                sys.argv[4]):  # see if cookie is expired
+            # cookie is valid, update cookie time
             sessions[sessionID] = (sessions[sessionID][0], datetime.datetime.now())
-            #send file
-            userDirect = sys.argv[5] + sessions[sessionID][0]
-            fileName = headers[0].split()[1]
-            userDirect = userDirect + fileName
-            #attempt to open file
-            try:
-                with open(userDirect, 'r'):
-                    f = open(userDirect, 'r')
+            # get file path
+            userDirect = sys.argv[5] + sessions[sessionID][0] + headers[0].split()[1]
+            try:  # attempt to open file
+                with open(userDirect, 'r') as f:
                     logger("GET SUCCEEDED: " + sessions[sessionID][0] + " : " + headers[0].split()[1])
                     connection.sendall(("HTTP/1.0 200 OK\r\n\r\n" + f.read() + "\r\n").encode())
-                    return
-            except FileNotFoundError:
+            except FileNotFoundError:  # file not found
                 logger("GET FAILED: " + sessions[sessionID][0] + " : " + headers[0].split()[1])
                 connection.sendall("HTTP/1.0 404 Not Found\r\n\r\n".encode())
-
-                return
-            return
         else:
-            #cookie expired
+            # cookie expired
             logger("SESSION EXPIRED: " + sessions[sessionID][0] + " : " + headers[0].split()[1])
             connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
-            return
-        return
     else:
         logger("COOKIE INVALID: " + headers[0].split()[1])
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
-        return
-
-    return
 
 
-def listen(socket2):
+def listen(socket2: socket):
     while True:
         connection, client_address = socket2.accept()
         data = connection.recv(1024).decode()
         if data is None:
             continue
-        ## print(data)
 
         http_method, request_target, http_version = data.split()[:3]
 
@@ -120,7 +102,7 @@ def listen(socket2):
         connection.close()
 
 
-def authenticateUser(user, password):
+def authenticateUser(user: str, password: str):
     with open(sys.argv[3]) as json_file:
         data = json.load(json_file)
     if user in data:
