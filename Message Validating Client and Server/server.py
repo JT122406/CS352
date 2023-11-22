@@ -3,7 +3,7 @@ import sys
 import socket
 
 
-def serverStart(socket1, port, address):
+def serverStart(socket1: socket, port: int, address: str) -> socket.socket:
     socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
     socketserver.bind((address, port))
     socketserver.listen(1)
@@ -12,20 +12,20 @@ def serverStart(socket1, port, address):
 
 # python3 server.py 62 key.txt
 
-def getKeys():
+def getKeys() -> list[str]:
     with open(sys.argv[2], 'r') as file:
         return [line.strip() for line in file.readlines()]
 
 
-def decodeMessage(toDecode):
+def decodeMessage(toDecode: bytes) -> str:
     return toDecode.decode('ascii').strip()
 
 
-def encodeMessage(toEncode):
+def encodeMessage(toEncode: str) -> bytes:
     return toEncode.encode('ascii')
 
 
-def hashMessage(message, key):
+def hashMessage(message: str, key: str) -> str:
     hash = hashlib.sha256()
     hash.update(encodeMessage(message))
     hash.update(encodeMessage(key))
