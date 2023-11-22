@@ -39,14 +39,14 @@ def post_request(connection, data):
     if authVar[0]:
         logger("LOGIN SUCCESSFUL: " + username + " : " + password)
         cookie = generate_random_session_id()
-        connection.sendall("HTTP/1.0 200 OK\r\n" + "Set-Cookie: sessionID=" + cookie + "\r\n\r\nLogged in!")
+        connection.sendall(("HTTP/1.0 200 OK\r\n" + "Set-Cookie: sessionID=" + cookie + "\r\n\r\nLogged in!").encode())
         sessions[cookie] = (username, datetime.datetime.now())
     elif authVar[1] == 1:
         logger("LOGIN FAILED: wronguser : " + password)
-        connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!")
+        connection.sendall(("HTTP/1.0 200 OK\r\n\r\nLogin failed!").encode())
     else:
         logger("LOGIN FAILED: " + username + " : " + password)
-        connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!")
+        connection.sendall(("HTTP/1.0 200 OK\r\n\r\nLogin failed!").encode())
 
 
 def get_request(connection, data):
