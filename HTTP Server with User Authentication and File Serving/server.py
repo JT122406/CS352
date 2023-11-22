@@ -12,7 +12,7 @@ def logger(message: str):
     print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
 
 
-def serverStart(socket1: socket, port: int, address: str):
+def serverStart(socket1: socket, port: int, address: str) -> socket:
     socketserver = socket1.socket(socket1.AF_INET, socket1.SOCK_STREAM)
     socketserver.bind((address, port))
     socketserver.listen(1)
@@ -102,7 +102,7 @@ def listen(socket2: socket):
         connection.close()
 
 
-def authenticateUser(user: str, password: str):
+def authenticateUser(user: str, password: str) -> (bool, int):
     with open(sys.argv[3]) as json_file:
         data = json.load(json_file)
     if user in data:
@@ -111,7 +111,7 @@ def authenticateUser(user: str, password: str):
         return False, 1
 
 
-def generate_random_session_id():
+def generate_random_session_id() -> str:
     return format(random.randint(0, 2 ** 64 - 1), 'x')
 
 
