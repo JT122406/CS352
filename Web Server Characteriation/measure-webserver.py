@@ -7,10 +7,14 @@ def printAverage(averageLatency: float):
 
 
 def main():
+    load_layer("http")
     processed_file = rdpcap(sys.argv[1])
     sessions = processed_file.sessions()
-    for packet in sessions:
-        numPacket = numPacket + 1
+    counter = 0
+    for session in sessions:
+        for packetX in sessions[session]:
+            counter += 1
+
     host = sys.argv[2]
     port = int(sys.argv[3])
 
