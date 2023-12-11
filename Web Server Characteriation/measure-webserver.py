@@ -4,6 +4,8 @@ import sys
 from scapy.layers.inet import TCP, IP
 from scapy.plist import _PacketList, _Inner
 
+host = sys.argv[2]
+port = int(sys.argv[3])
 
 def printAverage(averageLatency: float):
     print("AVERAGELATENCY: " + averageLatency.__str__())
@@ -18,18 +20,21 @@ def readProcessFile(pcap_filename: str) -> Dict[str, _PacketList[_Inner]]:
     return processed_file.sessions()
 
 
+def validatePacket(packetX: _Inner) -> bool:
+    if packetX.haslayer(TCP) and packetX.haslayer(IP):
+        return True
+
+
 def main():
     load_layer("http")
     sessions = readProcessFile(sys.argv[1])
-    host = sys.argv[2]
-    port = int(sys.argv[3])
     sessionsC = 0
     counter = 0
     for session in sessions:
         sessionsC += 1
         print("SESSION: " + str(sessionsC))
         for packetX in sessions[session]:
-            if packetX.haslayer(TCP) and packetX.haslayer(IP):
+            if validatePacket(packetX):
                 ip_src = packetX["IP"].src
                 ip_dst = packetX["IP"].dst
                 tcp_sport = packetX["TCP"].sport
@@ -47,7 +52,7 @@ def main():
                 print(packetX.summary())
                 print(packetX.fields)
                 print("Sent Time: ", packetX.sent_time)
-                print("Time: ",packetX.time)
+                print("Time: ", packetX.time)
 
 
 if __name__ == "__main__":
