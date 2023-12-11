@@ -7,7 +7,8 @@ from scapy.plist import _PacketList, _Inner
 host = sys.argv[2]
 port = int(sys.argv[3])
 
-def printAverage(averageLatency: float):
+
+def printAverage(averageLatency: float) -> None:
     print("AVERAGELATENCY: " + averageLatency.__str__())
 
 
@@ -22,7 +23,10 @@ def readProcessFile(pcap_filename: str) -> Dict[str, _PacketList[_Inner]]:
 
 def validatePacket(packetX: _Inner) -> bool:
     if packetX.haslayer(TCP) and packetX.haslayer(IP):
-        return True
+        print("Validating packet IP: " + packetX[IP].src)
+        print("Validating packet TCP: ", int(packetX[TCP].sport))
+        return packetX[IP].src == host and int(packetX[TCP].sport) == port
+    return False
 
 
 def main():
@@ -35,24 +39,15 @@ def main():
         print("SESSION: " + str(sessionsC))
         for packetX in sessions[session]:
             if validatePacket(packetX):
-                ip_src = packetX["IP"].src
-                ip_dst = packetX["IP"].dst
-                tcp_sport = packetX["TCP"].sport
-                tcp_dport = packetX["TCP"].dport
-
-                if ip_dst == host and tcp_dport == port:
-                    # HTTP response
-                    responses[(ip_src, tcp_sport)].append(packet.time)
-                elif ip_src == host and tcp_sport == port:
-                    # HTTP request
-                    requests[(ip_dst, tcp_dport)].append(packet.time)
-
+                print("Showing packet: ")
+                print(packetX.show())
                 counter += 1
                 print("PACKET: " + str(counter))
                 print(packetX.summary())
                 print(packetX.fields)
                 print("Sent Time: ", packetX.sent_time)
                 print("Time: ", packetX.time)
+                exit(1)
 
 
 if __name__ == "__main__":
