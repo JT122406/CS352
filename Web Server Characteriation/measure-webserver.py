@@ -22,11 +22,7 @@ def readProcessFile(pcap_filename: str) -> Dict[str, _PacketList[_Inner]]:
 
 
 def validatePacket(packetX: _Inner) -> bool:
-    if packetX.haslayer(TCP) and packetX.haslayer(IP):
-        print("Validating packet IP: " + packetX[IP].src)
-        print("Validating packet TCP: ", int(packetX[TCP].sport))
-        return packetX[IP].src == host and int(packetX[TCP].sport) == port
-    return False
+    return packetX.haslayer(TCP).__bool__() and packetX.haslayer(IP).__bool__()
 
 
 def main():
@@ -34,11 +30,17 @@ def main():
     sessions = readProcessFile(sys.argv[1])
     sessionsC = 0
     counter = 0
+    responses = []
+    requests = []
     for session in sessions:
         sessionsC += 1
         print("SESSION: " + str(sessionsC))
         for packetX in sessions[session]:
             if validatePacket(packetX):
+                if packetX[IP].src == host and packetX[TCP].sport == port:
+                    requests.append(packetX)
+                else:
+                    responses.append(packetX)
                 print("Showing packet: ")
                 print(packetX.show())
                 counter += 1
@@ -47,7 +49,6 @@ def main():
                 print(packetX.fields)
                 print("Sent Time: ", packetX.sent_time)
                 print("Time: ", packetX.time)
-                exit(1)
 
 
 if __name__ == "__main__":
