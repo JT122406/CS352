@@ -1,53 +1,76 @@
-from scapy.all import *
 import sys
 
+from scapy.all import *
+from scapy.layers.http import HTTPRequest, HTTPResponse
 from scapy.layers.inet import TCP, IP
-from scapy.plist import _PacketList, _Inner
+from scapy.plist import _Inner
 
 destHost = sys.argv[2]
 destPort = int(sys.argv[3])
+request_info = {}
+response_times = []
 
 
 def printAverage(averageLatency: float) -> None:
-    print("AVERAGELATENCY: " + averageLatency.__str__())
+    print("AVERAGE LATENCY: " + round(averageLatency, 5).__str__())
 
 
-def readProcessFile(pcap_filename: str) -> Dict[str, _PacketList[_Inner]]:
+def printPercentiles() -> None:
+    sorted_times = sorted(response_times)
+    length = len(sorted_times)
+
+    percentile_25 = sorted_times[int(length * 0.25)]
+    percentile_50 = sorted_times[int(length * 0.50)]
+    percentile_75 = sorted_times[int(length * 0.75)]
+    percentile_95 = sorted_times[int(length * 0.95)]
+    percentile_99 = sorted_times[int(length * 0.99)]
+
+    print(f"PERCENTILES: {percentile_25:.5f}, {percentile_50:.5f}, {percentile_75:.5f}, {percentile_95:.5f}, {percentile_99:.5f}")
+
+
+def readProcessFile(pcap_filename: str) -> PacketList:
     try:
         processed_file = rdpcap(pcap_filename)
     except Exception as e:
         print(f"ERROR: Could not read file {e}")
         sys.exit(1)
-    return processed_file.sessions()
+    return processed_file
 
 
 def validatePacket(packetX: _Inner) -> bool:
     return packetX.haslayer(TCP).__bool__() and packetX.haslayer(IP).__bool__()
 
 
+def packetProcessor(packetX: _Inner) -> None:
+    if validatePacket(packetX):
+        source_ip = packetX[IP].src
+        dst_ip = packetX[IP].dst
+        source_port = packetX[TCP].sport
+        dst_port = packetX[TCP].dport
+
+        if packetX.haslayer(HTTPRequest) and dst_port == destPort and dst_ip == destHost:
+            requestKey = (source_ip, dst_ip, source_port, dst_port)
+            request_info[requestKey] = {'requestTime': packetX.time, 'responseTime': None}
+        elif packetX.haslayer(HTTPResponse) and source_port == destPort and source_ip == destHost:
+            responseKey = (dst_ip, source_ip, dst_port, source_port)
+
+            if responseKey in request_info:
+                requestTime = request_info[responseKey]['requestTime']
+
+                response_times.append(packetX.time - requestTime)
+
+                del request_info[responseKey]
+
+
 def main():
     load_layer("http")
-    sessions = readProcessFile(sys.argv[1])
-    counter = 0
-    responses = []
-    requests = []
-    for session in sessions:
-        for packetX in sessions[session]:
-            if validatePacket(packetX):
-                if packetX[IP].dst == destHost and packetX[TCP].dport == destPort:
-                    requests.append(packetX)
-                elif packetX[IP].src == destHost and packetX[TCP].sport == destPort:
-                    responses.append(packetX)
+    packets = readProcessFile(sys.argv[1])
+    for packet1 in packets:
+        packetProcessor(packet1)
 
-
-                print("Showing packet: ")
-                print(packetX.show())
-                counter += 1
-                print("PACKET: " + str(counter))
-                print(packetX.summary())
-                print(packetX.fields)
-                print("Sent Time: ", packetX.sent_time)
-                print("Time: ", packetX.time)
+    averageLatency = sum(response_times) / len(response_times) if response_times else 0
+    printAverage(averageLatency)
+    printPercentiles()
 
 
 if __name__ == "__main__":
