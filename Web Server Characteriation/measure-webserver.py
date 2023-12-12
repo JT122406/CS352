@@ -4,8 +4,8 @@ import sys
 from scapy.layers.inet import TCP, IP
 from scapy.plist import _PacketList, _Inner
 
-host = sys.argv[2]
-port = int(sys.argv[3])
+destHost = sys.argv[2]
+destPort = int(sys.argv[3])
 
 
 def printAverage(averageLatency: float) -> None:
@@ -37,10 +37,12 @@ def main():
         print("SESSION: " + str(sessionsC))
         for packetX in sessions[session]:
             if validatePacket(packetX):
-                if packetX[IP].src == host and packetX[TCP].sport == port:
+                if packetX[IP].dst == destHost and packetX[TCP].dport == destPort:
                     requests.append(packetX)
-                else:
+                elif packetX[IP].src == destHost and packetX[TCP].sport == destPort:
                     responses.append(packetX)
+
+
                 print("Showing packet: ")
                 print(packetX.show())
                 counter += 1
