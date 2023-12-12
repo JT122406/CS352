@@ -28,13 +28,10 @@ def validatePacket(packetX: _Inner) -> bool:
 def main():
     load_layer("http")
     sessions = readProcessFile(sys.argv[1])
-    sessionsC = 0
     counter = 0
     responses = []
     requests = []
     for session in sessions:
-        sessionsC += 1
-        print("SESSION: " + str(sessionsC))
         for packetX in sessions[session]:
             if validatePacket(packetX):
                 if packetX[IP].dst == destHost and packetX[TCP].dport == destPort:
