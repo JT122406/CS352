@@ -21,7 +21,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-    - name: Test Run
+    - name: Basic Message Test Run
+      run: | 
+        cd Message\ Validating\ Client\ and\ Server
+        sudo python3 server.py 7894 Message_File_Students/Basic-message/key.txt & sudo python3 client.py localhost 7894 Message_File_Students/Basic-message/message1.txt Message_File_Students/Basic-message/signature1.txt
+    - name: Medium Message Test Run
       run: |
-        cd Message\ Validating\ Client\ and\ Server 
-        sudo python3 server.py 7894 Message_File_Students/Advanced-message/key.txt & sudo python3 client.py localhost 7894 Message_File_Students/Advanced-message/message3.txt Message_File_Students/Advanced-message/signature3.txt
+        cd Message\ Validating\ Client\ and\ Server
+        sudo python3 server.py 7895 Message_File_Students/Medium-message/key.txt & sudo python3 client.py localhost 7895 Message_File_Students/Medium-message/message2.txt Message_File_Students/Medium-message/signature2.txt
+    - name: Advanced Message Test Run
+      run: |
+        cd Message\ Validating\ Client\ and\ Server
+        sudo python3 server.py 7896 Message_File_Students/Advanced-message/key.txt & sudo python3 client.py localhost 7896 Message_File_Students/Advanced-message/message3.txt Message_File_Students/Advanced-message/signature3.txt
