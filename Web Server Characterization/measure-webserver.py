@@ -23,7 +23,12 @@ def printPercentiles() -> None:
     percentile_95 = sorted_times[int(length * 0.95)]
     percentile_99 = sorted_times[int(length * 0.99)]
 
-    print(f"PERCENTILES: {percentile_25:.5f}, {percentile_50:.5f}, {percentile_75:.5f}, {percentile_95:.5f}, {percentile_99:.5f}")
+    print(
+        f"PERCENTILES: {percentile_25:.5f}, {percentile_50:.5f}, {percentile_75:.5f}, {percentile_95:.5f}, {percentile_99:.5f}")
+
+
+def printklDivergence(klDivergence: float) -> None:
+    print("KL DIVERGENCE: " + round(klDivergence, 5).__str__())
 
 
 def readProcessFile(pcap_filename: str) -> PacketList:
