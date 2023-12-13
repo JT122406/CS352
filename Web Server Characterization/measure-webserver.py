@@ -1,5 +1,3 @@
-import sys
-
 from scapy.all import *
 from scapy.layers.http import HTTPRequest, HTTPResponse
 from scapy.layers.inet import TCP, IP
