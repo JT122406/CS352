@@ -24,7 +24,6 @@ def getNTPTimeValue(server="time.apple.com", port=123) -> (bytes, float, float):
     soc.sendto(msg, address)
     msg, address = soc.recvfrom(buf)
 
-    # t = struct.unpack('!12I', msg)[10]
     struct.unpack('!12I', msg[:48])
     T4 = datetime.now(UTC)
     return msg, T1.timestamp(), T4.timestamp()
