@@ -41,7 +41,7 @@ def encodeMessage(toEncode: str) -> bytes:
     return (toEncode + '\n').encode('ascii')
 
 
-def main():
+def main() -> None:
     socket1 = startClient(sys.argv[1], int(sys.argv[2]))
     messages = getMessages(sys.argv[3])
     signatures = getSignatures(sys.argv[4])

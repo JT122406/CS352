@@ -8,7 +8,7 @@ import sys
 sessions = {}
 
 
-def logger(message: str):
+def logger(message: str) -> None:
     print("SERVER LOG: " + datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + " " + message)
 
 
@@ -19,7 +19,7 @@ def serverStart(socket1: socket, port: int, address: str) -> socket:
     return socketserver
 
 
-def post_request(connection: socket, data: str):
+def post_request(connection: socket, data: str) -> None:
     headers = data.split("\r\n")
     username = None
     password = None
@@ -49,7 +49,7 @@ def post_request(connection: socket, data: str):
         connection.sendall("HTTP/1.0 200 OK\r\n\r\nLogin failed!".encode())
 
 
-def get_request(connection: socket, data: str):
+def get_request(connection: socket, data: str) -> None:
     headers = data.split("\r\n")
     sessionID = None
 
@@ -82,7 +82,7 @@ def get_request(connection: socket, data: str):
         connection.sendall("HTTP/1.0 401 Unauthorized\r\n\r\n".encode())
 
 
-def listen(socket2: socket):
+def listen(socket2: socket) -> None:
     while True:
         connection, client_address = socket2.accept()
         data = connection.recv(1024).decode()
@@ -114,7 +114,7 @@ def generate_random_session_id() -> str:
     return format(random.randint(0, 2 ** 64 - 1), 'x')
 
 
-def main():
+def main() -> None:
     listen(serverStart(socket, int(sys.argv[2]), sys.argv[1]))
 
 

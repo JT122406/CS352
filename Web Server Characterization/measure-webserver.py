@@ -60,7 +60,7 @@ def packetProcessor(packetX: _Inner) -> None:
                 del request_info[responseKey]
 
 
-def main():
+def main() -> None:
     load_layer("http")
     packets = readProcessFile(sys.argv[1])
     for packet1 in packets:

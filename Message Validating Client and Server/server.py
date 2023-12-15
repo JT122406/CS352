@@ -32,7 +32,7 @@ def hashMessage(message: str, key: str) -> str:
     return hash.hexdigest()
 
 
-def main():
+def main() -> None:
     server_socket = serverStart(socket, int(sys.argv[1]), 'localhost')
     keys = getKeys()
     client_socket, client_address = server_socket.accept()
